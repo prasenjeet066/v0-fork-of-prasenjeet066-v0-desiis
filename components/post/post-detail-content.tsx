@@ -204,7 +204,7 @@ export function PostDetailContent({ postId, userId }: PostDetailContentProps) {
 
         {/* Reply Form */}
         {currentUser && (
-          <div className="border-b">
+          <div className="border-b p-2">
             <CreatePost userId={userId} replyTo={postId} onPostCreated={handleReplyCreated} />
           </div>
         )}
