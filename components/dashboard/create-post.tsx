@@ -158,9 +158,10 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
     <div className="border-b p-3 lg:p-4 bengali-font bg-white">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 lg:gap-3">
-          <Avatar className="h-10 w-10 lg:h-12 lg:w-12 flex-shrink-0">
-            <AvatarFallback>ব</AvatarFallback>
-          </Avatar>
+          <Avatar className="cursor-pointer h-10 w-10 lg:h-12 lg:w-12">
+                <AvatarImage src={post.avatar_url || undefined} />
+                <AvatarFallback>{post.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
+              </Avatar>
           <div className="flex-1 min-w-0">
             <Textarea
               ref={textareaRef}
