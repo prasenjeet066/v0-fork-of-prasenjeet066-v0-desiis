@@ -29,7 +29,6 @@ export function CreatePost({ userId, profile,replyTo, onPostCreated }: CreatePos
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [profile, setProfile] = useState(null)
   
   const handleMediaUpload = async (files: FileList) => {
     if (files.length === 0) return
