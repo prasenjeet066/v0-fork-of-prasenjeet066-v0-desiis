@@ -8,7 +8,6 @@ import { Heart, MessageCircle, Repeat2, Share, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { ReplyDialog } from "./reply-dialog"
 import { RepostDialog } from "./repost-dialog"
-import { PostActionsMenu } from "./post-actions-menu"
 
 interface PostCardProps {
   post: {
@@ -130,14 +129,6 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 <span className="text-gray-500 text-xs lg:text-sm">
                   {formatDistanceToNow(displayTime, { addSuffix: true })}
                 </span>
-                <div className="ml-auto">
-                  <PostActionsMenu
-                    post={post}
-                    currentUserId={currentUserId}
-                    onPostUpdated={onReply}
-                    onPostDeleted={onReply}
-                  />
-                </div>
               </div>
 
               <div
