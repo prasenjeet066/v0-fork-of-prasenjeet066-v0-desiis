@@ -14,11 +14,12 @@ import { ImageViewer } from "@/components/media/image-viewer"
 
 interface CreatePostProps {
   userId: string
+  profile: object
   replyTo?: string
   onPostCreated?: () => void
 }
 
-export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) {
+export function CreatePost({ userId, profile,replyTo, onPostCreated }: CreatePostProps) {
   const [content, setContent] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -29,21 +30,6 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [profile, setProfile] = useState(null)
-
-  useEffect(() => {
-    async function fetchUser() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles') // or 'users'
-          .select('*')
-          .eq('id', user.id)
-          .single()
-        setProfile(profile)
-      }
-    }
-    fetchUser()
-  }, [])
   
   const handleMediaUpload = async (files: FileList) => {
     if (files.length === 0) return
