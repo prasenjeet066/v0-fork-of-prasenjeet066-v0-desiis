@@ -47,7 +47,7 @@ export function CreatePostPage({ user }: CreatePostPageProps) {
 
         {/* Create Post Form */}
         <div className="p-4">
-          <CreatePost userId={user.id} onPostCreated={handlePostCreated} />
+          <CreatePost userId={user.id} profile={profile} onPostCreated={handlePostCreated} />
         </div>
       </div>
     </div>
