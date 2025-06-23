@@ -115,7 +115,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 >
                   <span className="font-semibold text-sm lg:text-base truncate flex items-center gap-1">
                     {post.display_name}
-                    {post.is_verified && <CheckCircle className="h-4 w-4 text-black fill-current" />}
+                    {post.is_verified && <CheckCircle className="h-4 w-4 text-black" />}
                   </span>
                 </Link>
                 <Link
