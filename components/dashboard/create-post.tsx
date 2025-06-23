@@ -14,12 +14,11 @@ import { ImageViewer } from "@/components/media/image-viewer"
 
 interface CreatePostProps {
   userId: string
-  profile: object
   replyTo?: string
   onPostCreated?: () => void
 }
 
-export function CreatePost({ userId, profile,replyTo, onPostCreated }: CreatePostProps) {
+export function CreatePost({ userId,replyTo, onPostCreated }: CreatePostProps) {
   const [content, setContent] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -160,8 +159,8 @@ export function CreatePost({ userId, profile,replyTo, onPostCreated }: CreatePos
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 lg:gap-3">
           <Avatar className="cursor-pointer h-10 w-10 lg:h-12 lg:w-12">
-                <AvatarImage src={profile.avatar_url || undefined} />
-                <AvatarFallback>{profile.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
+                
+                <AvatarFallback>{"U"}</AvatarFallback>
               </Avatar>
           <div className="flex-1 min-w-0">
             <Textarea
