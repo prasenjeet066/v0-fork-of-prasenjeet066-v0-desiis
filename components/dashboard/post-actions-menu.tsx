@@ -23,7 +23,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { supabase } from "@/lib/supabase/client"
-
+import { useRouter } from 'next/router';
 interface PostActionsMenuProps {
   post: any
   currentUserId: string
@@ -41,7 +41,15 @@ export function PostActionsMenu({ post, currentUserId, onPostUpdated, onPostDele
   const [reportReason, setReportReason] = useState("")
   const [reportUserReason, setReportUserReason] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  
+// or for react-router-dom: import { useLocation } from 'react-router-dom';
 
+  const router = useRouter();
+  const pathname = router.pathname;
+
+  const isProfilePage = pathname.startsWith('/profile/');
+// Pass as prop similarly
+//<PostActionsMenu ... isProfilePage={isProfilePage} />
   const isOwnPost = post.user_id === currentUserId
 
   const handleDelete = async () => {
@@ -160,7 +168,7 @@ export function PostActionsMenu({ post, currentUserId, onPostUpdated, onPostDele
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {isOwnPost ? (
+          {isOwnPost && isProfilePage ? (
             <>
               <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
                 <Edit className="mr-2 h-4 w-4" />
