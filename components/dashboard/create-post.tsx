@@ -28,7 +28,23 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [profile, setProfile] = useState(null)
 
+  useEffect(() => {
+    async function fetchUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles') // or 'users'
+          .select('*')
+          .eq('id', user.id)
+          .single()
+        setProfile(profile)
+      }
+    }
+    fetchUser()
+  }, [])
+  
   const handleMediaUpload = async (files: FileList) => {
     if (files.length === 0) return
 
@@ -159,8 +175,8 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 lg:gap-3">
           <Avatar className="cursor-pointer h-10 w-10 lg:h-12 lg:w-12">
-                <AvatarImage src={post.avatar_url || undefined} />
-                <AvatarFallback>{post.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
+                <AvatarImage src={profile.avatar_url || undefined} />
+                <AvatarFallback>{profile.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
               </Avatar>
           <div className="flex-1 min-w-0">
             <Textarea
