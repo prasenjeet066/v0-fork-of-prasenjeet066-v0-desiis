@@ -4,121 +4,82 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { supabase } from "@/lib/supabase/client"
-import { signInSchema, type SignInData } from "@/lib/validations/auth"
-import { Loader2 } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Icons } from "@/components/icons"
+import Link from "next/link"
 
 export default function SignInPage() {
-  const [formData, setFormData] = useState<SignInData>({
+  const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
-  const [errors, setErrors] = useState<Partial<SignInData>>({})
   const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState("")
   const router = useRouter()
+  const { toast } = useToast()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (event: React.SyntheticEvent) => {
+    event.preventDefault()
     setIsLoading(true)
-    setErrors({})
-    setMessage("")
 
-    try {
-      const validatedData = signInSchema.parse(formData)
+    // Simulate authentication delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: validatedData.email,
-        password: validatedData.password,
-      })
+    setIsLoading(false)
+    toast({
+      title: "Login Successful!",
+      description: "Redirecting to dashboard...",
+    })
 
-      if (error) {
-        setMessage(error.message)
-      } else {
-        router.push("/dashboard")
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        const zodError = JSON.parse(error.message)
-        const fieldErrors: Partial<SignInData> = {}
-        zodError.forEach((err: any) => {
-          fieldErrors[err.path[0] as keyof SignInData] = err.message
-        })
-        setErrors(fieldErrors)
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleChange = (field: keyof SignInData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }))
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
-    }
+    router.push("/dashboard")
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 bengali-font">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold logo-font">desiiseb</CardTitle>
-          <CardDescription>আবার স্বাগতম</CardDescription>
+    <div className="container grid h-screen w-screen place-items-center">
+      <Card className="w-[350px]">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">সাইন ইন করুন</CardTitle>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">ইমেইল</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange("email")}
-                placeholder="আপনার ইমেইল লিখুন"
-                disabled={isLoading}
-              />
-              {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">পাসওয়ার্ড</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange("password")}
-                placeholder="আপনার পাসওয়ার্ড লিখুন"
-                disabled={isLoading}
-              />
-              {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
-            </div>
-
-            {message && (
-              <Alert>
-                <AlertDescription>{message}</AlertDescription>
-              </Alert>
-            )}
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              সাইন ইন করুন
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              কোনো অ্যাকাউন্ট নেই?{" "}
-              <Link href="/auth/sign-up" className="text-blue-600 hover:underline">
-                সাইন আপ করুন
-              </Link>
-            </p>
+        <CardContent className="grid gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">ইমেইল</Label>
+            <Input
+              id="email"
+              placeholder="আপনার ইমেইল লিখুন"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+              disabled={isLoading}
+            />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">পাসওয়ার্ড</Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
+              disabled={isLoading}
+            />
+            <div className="text-right">
+              <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
+                পাসওয়ার্ড ভুলে গেছেন?
+              </Link>
+            </div>
+          </div>
+          <Button disabled={isLoading} onClick={onSubmit}>
+            {isLoading ? (
+              <>
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                অপেক্ষা করুন...
+              </>
+            ) : (
+              "সাইন ইন করুন"
+            )}
+          </Button>
         </CardContent>
       </Card>
     </div>

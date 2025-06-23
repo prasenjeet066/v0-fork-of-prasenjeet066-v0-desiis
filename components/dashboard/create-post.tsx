@@ -18,7 +18,7 @@ interface CreatePostProps {
   onPostCreated?: () => void
 }
 
-export function CreatePost({ userId,replyTo, onPostCreated }: CreatePostProps) {
+export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) {
   const [content, setContent] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -28,7 +28,7 @@ export function CreatePost({ userId,replyTo, onPostCreated }: CreatePostProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  
+
   const handleMediaUpload = async (files: FileList) => {
     if (files.length === 0) return
 
@@ -43,18 +43,29 @@ export function CreatePost({ userId,replyTo, onPostCreated }: CreatePostProps) {
       return
     }
 
+    if (mediaFiles.length + validFiles.length > 4) {
+      setError("You can only upload up to 4 media files")
+      return
+    }
+
     setIsUploadingMedia(true)
     const uploadedUrls: string[] = []
 
     try {
       for (const file of validFiles) {
         const fileExt = file.name.split(".").pop()
-        const fileName = `${Date.now()}-${Math.random()}.${fileExt}`
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
         const filePath = `posts/${userId}/${fileName}`
 
-        const { error: uploadError } = await supabase.storage.from("post-media").upload(filePath, file)
+        const { data, error: uploadError } = await supabase.storage.from("post-media").upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        })
 
-        if (uploadError) throw uploadError
+        if (uploadError) {
+          console.error("Upload error:", uploadError)
+          throw uploadError
+        }
 
         const {
           data: { publicUrl },
@@ -65,9 +76,10 @@ export function CreatePost({ userId,replyTo, onPostCreated }: CreatePostProps) {
 
       setMediaFiles((prev) => [...prev, ...validFiles])
       setMediaUrls((prev) => [...prev, ...uploadedUrls])
+      setError("")
     } catch (error) {
       console.error("Error uploading media:", error)
-      setError("Failed to upload media")
+      setError("Failed to upload media. Please try again.")
     } finally {
       setIsUploadingMedia(false)
     }
@@ -159,9 +171,8 @@ export function CreatePost({ userId,replyTo, onPostCreated }: CreatePostProps) {
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 lg:gap-3">
           <Avatar className="cursor-pointer h-10 w-10 lg:h-12 lg:w-12">
-                
-                <AvatarFallback>{"U"}</AvatarFallback>
-              </Avatar>
+            <AvatarFallback>{"U"}</AvatarFallback>
+          </Avatar>
           <div className="flex-1 min-w-0">
             <Textarea
               ref={textareaRef}
@@ -273,7 +284,13 @@ export function CreatePost({ userId,replyTo, onPostCreated }: CreatePostProps) {
         accept="image/*,video/*"
         multiple
         className="hidden"
-        onChange={(e) => e.target.files && handleMediaUpload(e.target.files)}
+        onChange={(e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            handleMediaUpload(e.target.files)
+          }
+          // Reset the input so the same file can be selected again
+          e.target.value = ""
+        }}
       />
     </div>
   )
