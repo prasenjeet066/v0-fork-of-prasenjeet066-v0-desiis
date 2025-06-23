@@ -139,14 +139,9 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
     if (textareaRef.current) {
       const start = textareaRef.current.selectionStart
       const end = textareaRef.current.selectionEnd
-      let newContent;
-      let repl;
-      if(replyTo){
-        repl = `@${replyTo}`;
-      }
-      newContent = repl + " " +content.substring(0, start) + text + content.substring(end)
-      
+      const newContent = content.substring(0, start) + text + content.substring(end)
       setContent(newContent)
+
       // Set cursor position after inserted text
       setTimeout(() => {
         if (textareaRef.current) {
