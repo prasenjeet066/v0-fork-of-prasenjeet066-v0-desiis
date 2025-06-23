@@ -43,6 +43,11 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
       return
     }
 
+    if (mediaFiles.length + validFiles.length > 4) {
+      setError("You can only upload up to 4 media files")
+      return
+    }
+
     setIsUploadingMedia(true)
     const uploadedUrls: string[] = []
 
@@ -71,6 +76,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
 
       setMediaFiles((prev) => [...prev, ...validFiles])
       setMediaUrls((prev) => [...prev, ...uploadedUrls])
+      setError("")
     } catch (error) {
       console.error("Error uploading media:", error)
       setError("Failed to upload media. Please try again.")
@@ -279,10 +285,11 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
         multiple
         className="hidden"
         onChange={(e) => {
-          if (e.target.files) {
+          if (e.target.files && e.target.files.length > 0) {
             handleMediaUpload(e.target.files)
-            e.target.value = "" // Reset input
           }
+          // Reset the input so the same file can be selected again
+          e.target.value = ""
         }}
       />
     </div>

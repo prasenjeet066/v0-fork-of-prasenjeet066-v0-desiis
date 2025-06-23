@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,30 +11,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/lib/supabase/client"
 import { Loader2 } from "lucide-react"
 
-export default function UpdatePasswordPage() {
+export function ResetPasswordForm() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [message, setMessage] = useState("")
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    // Check if user is authenticated via password reset
-    const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) {
-        router.push("/auth/sign-in")
-      }
-    }
-    checkAuth()
-  }, [router])
+    // Check if we have the required tokens from the URL
+    const accessToken = searchParams.get("access_token")
+    const refreshToken = searchParams.get("refresh_token")
 
-  const handleUpdatePassword = async (e: React.FormEvent) => {
+    if (!accessToken || !refreshToken) {
+      setError("Invalid reset link. Please request a new password reset.")
+    }
+  }, [searchParams])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
+    setMessage("")
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")
@@ -42,8 +42,8 @@ export default function UpdatePasswordPage() {
       return
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long")
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long")
       setIsLoading(false)
       return
     }
@@ -56,7 +56,10 @@ export default function UpdatePasswordPage() {
       if (error) {
         setError(error.message)
       } else {
-        router.push("/dashboard")
+        setMessage("Password updated successfully! Redirecting to dashboard...")
+        setTimeout(() => {
+          router.push("/dashboard")
+        }, 2000)
       }
     } catch (err) {
       setError("An unexpected error occurred")
@@ -66,14 +69,14 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 bengali-font">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Update Password</CardTitle>
+          <CardTitle className="text-2xl text-center">Set New Password</CardTitle>
           <CardDescription className="text-center">Enter your new password below.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleUpdatePassword} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password">New Password</Label>
               <Input
@@ -84,11 +87,12 @@ export default function UpdatePasswordPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                minLength={8}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -97,12 +101,15 @@ export default function UpdatePasswordPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                minLength={8}
               />
             </div>
 
-            {error && <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{error}</div>}
+            {error && <div className="text-sm text-red-600 text-center">{error}</div>}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            {message && <div className="text-sm text-green-600 text-center">{message}</div>}
+
+            <Button type="submit" className="w-full" disabled={isLoading || !password || !confirmPassword}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Update Password
             </Button>
