@@ -206,7 +206,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
               )}
 
               {/* Media display for non-repost */}
-              {!post.is_repost && post.media_urls && post.media_urls.length > 0 && (
+              {post.media_urls && post.media_urls.length > 0 && (
                 <div className="mb-3 rounded-lg overflow-hidden border">
                   {post.media_type === "video" ? (
                     <video src={post.media_urls[0]} className="w-full max-h-96 object-cover" controls />
