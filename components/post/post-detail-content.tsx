@@ -211,6 +211,7 @@ export function PostDetailContent({ postId, userId }: PostDetailContentProps) {
 
         {/* Replies */}
         <div className="divide-y">
+          <h3 className="my-2 text-sm">All Reply</h3>
           {replies.map((reply) => (
             <PostCard
               key={reply.id}
