@@ -111,7 +111,7 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
             reposts_count: repostsMap.get(post.id) || 0,
             is_reposted: userRepostsSet.has(post.id),
             reply_to: post.reply_to,
-            is_verified:post.profiles.is_verified,
+            //is_verified:post.profiles.is_verified,
             media_urls: post.media_urls,
             media_type: post.media_type,
             is_repost: false || null,
