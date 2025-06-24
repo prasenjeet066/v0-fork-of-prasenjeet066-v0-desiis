@@ -28,7 +28,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-
+  
   // Improved handleMediaUpload
   const handleMediaUpload = async (files: FileList) => {
     if (files.length === 0) return
@@ -159,9 +159,10 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
     if (textareaRef.current) {
       const start = textareaRef.current.selectionStart
       const end = textareaRef.current.selectionEnd
+      
       const newContent = content.substring(0, start) + text + content.substring(end)
       setContent(newContent)
-
+      
       // Set cursor position after inserted text
       setTimeout(() => {
         if (textareaRef.current) {
@@ -182,6 +183,9 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
             <AvatarFallback>{"U"}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
+            {replyTo!==null (
+            <a href={"profile/"+replyTo}>{"Reply to @"+replyTo}</a>):<></>
+            }
             <Textarea
               ref={textareaRef}
               placeholder="কী ঘটছে?"
