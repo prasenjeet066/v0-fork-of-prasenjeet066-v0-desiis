@@ -202,12 +202,12 @@ export function PostDetailContent({ postId, userId }: PostDetailContentProps) {
           onReply={handleReplyCreated}
         />
 
-        {/* Reply Form */}
+        {/* Reply Form 
         {currentUser && (
-          <div className="border-b">
+          <div className="">
             <CreatePost userId={userId} replyTo={postId} onPostCreated={handleReplyCreated} />
           </div>
-        )}
+        )}*/}
 
         {/* Replies */}
         <div className="divide-y">
