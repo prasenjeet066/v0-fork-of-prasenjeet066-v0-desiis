@@ -13,7 +13,7 @@ import { Menu, X, UserPlus, UserCheck, Calendar, MapPin, LinkIcon } from "lucide
 import { formatDistanceToNow } from "date-fns"
 import { bn } from "date-fns/locale"
 import Link from "next/link"
-
+import { VerificationBadge } from "@/components/badge/verification-badge"
 interface ProfileContentProps {
   username: string
   currentUserId: string | null
@@ -30,6 +30,7 @@ interface ProfileData {
   location: string | null
   created_at: string
   posts_count: number
+  is_verified: boolean 
   followers_count: number
   following_count: number
   is_following: boolean
@@ -364,7 +365,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
       )}
     </div>
   )
-
+  const isVerified = profileData?.is_verified || false;
   return (
     <div className="min-h-screen bg-gray-50 bengali-font">
       {/* Mobile header */}
@@ -467,7 +468,9 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
               </div>
 
               <div className="space-y-2">
-                <h1 className="text-xl font-bold">{profileData.display_name}</h1>
+                <h1 className="text-xl font-bold">{profileData.display_name} {isVerified &&
+                <VerificationBadge/>
+                }</h1>
                 <p className="text-gray-500">@{profileData.username}</p>
 
                 {profileData.bio && <p className="text-gray-900">{profileData.bio}</p>}
