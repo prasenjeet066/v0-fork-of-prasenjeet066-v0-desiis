@@ -44,7 +44,7 @@ export function PostActionsMenu({ post, currentUserId, onPostUpdated, onPostDele
   
 // or for react-router-dom: import { useLocation } from 'react-router-dom';
 
-  
+  const isOwnPost = post.user_id === currentUserId;
 
   const handleDelete = async () => {
     setIsLoading(true)
