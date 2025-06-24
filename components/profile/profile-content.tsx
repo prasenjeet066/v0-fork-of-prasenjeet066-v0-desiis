@@ -381,7 +381,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
               </Button>
               <Button variant="ghost" size="icon" asChild>
                 <Link href={`/profile/${currentProfile?.username}`}>
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-10 w-10">
                     <AvatarImage src={currentProfile?.avatar_url || undefined} />
                     <AvatarFallback className="text-xs">
                       {currentProfile?.display_name?.charAt(0)?.toUpperCase() || "ব"}
