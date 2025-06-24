@@ -29,6 +29,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
+  // Improved handleMediaUpload
   const handleMediaUpload = async (files: FileList) => {
     if (files.length === 0) return
 
@@ -49,39 +50,48 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
     }
 
     setIsUploadingMedia(true)
-    const uploadedUrls: string[] = []
+    setError("")
 
     try {
-      for (const file of validFiles) {
+      // Upload all files in parallel
+      const uploadResults = await Promise.all(validFiles.map(async (file) => {
         const fileExt = file.name.split(".").pop()
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
         const filePath = `posts/${userId}/${fileName}`
 
-        const { data, error: uploadError } = await supabase.storage.from("post-media").upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: false,
-        })
+        const { data, error: uploadError } = await supabase.storage
+          .from("post-media")
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+          })
 
         if (uploadError) {
-          console.error("Upload error:", uploadError)
-          throw uploadError
+          throw new Error(uploadError.message || "Upload error")
         }
 
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("post-media").getPublicUrl(filePath)
+        // Get public URL (this is always safe, but the file must be public in the bucket policy)
+        const { data: urlData, error: urlError } = await supabase
+          .storage
+          .from("post-media")
+          .getPublicUrl(filePath)
 
-        uploadedUrls.push(publicUrl)
-      }
+        if (urlError || !urlData?.publicUrl) {
+          throw new Error("Failed to get public URL for uploaded file.")
+        }
 
-      setMediaFiles((prev) => [...prev, ...validFiles])
-      setMediaUrls((prev) => [...prev, ...uploadedUrls])
+        return { file, url: urlData.publicUrl }
+      }))
+
+      setMediaFiles((prev) => [...prev, ...uploadResults.map(u => u.file)])
+      setMediaUrls((prev) => [...prev, ...uploadResults.map(u => u.url)])
       setError("")
-    } catch (error) {
-      console.error("Error uploading media:", error)
-      setError("Failed to upload media. Please try again.")
+    } catch (err: any) {
+      setError(err.message || "Failed to upload media. Please try again.")
     } finally {
       setIsUploadingMedia(false)
+      // Reset file input so user can re-select files
+      if (fileInputRef.current) fileInputRef.current.value = ""
     }
   }
 
@@ -108,40 +118,38 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
           content: validatedData.content,
           reply_to: validatedData.replyTo || null,
           media_urls: mediaUrls.length > 0 ? mediaUrls : null,
-          media_type: mediaUrls.length > 0 ? (mediaFiles[0]?.type.startsWith("video/") ? "video" : "image") : null,
+          media_type: mediaUrls.length > 0
+            ? (mediaFiles[0]?.type.startsWith("video/") ? "video" : "image")
+            : null,
         })
         .select()
         .single()
 
       if (postError) {
         setError(postError.message)
-      } else {
-        // Process hashtags
-        for (const hashtag of hashtags) {
-          const tagName = hashtag.slice(1) // Remove # symbol
+        return
+      }
 
-          // Insert or get hashtag
-          const { data: hashtagData, error: hashtagError } = await supabase
-            .from("hashtags")
-            .upsert({ name: tagName })
-            .select()
-            .single()
-
-          if (!hashtagError && hashtagData) {
-            // Link post to hashtag
-            await supabase.from("post_hashtags").insert({ post_id: postData.id, hashtag_id: hashtagData.id })
-          }
+      // Process hashtags
+      for (const hashtag of hashtags) {
+        const tagName = hashtag.slice(1) // Remove # symbol
+        const { data: hashtagData, error: hashtagError } = await supabase
+          .from("hashtags")
+          .upsert({ name: tagName })
+          .select()
+          .single()
+        if (!hashtagError && hashtagData) {
+          await supabase.from("post_hashtags").insert({ post_id: postData.id, hashtag_id: hashtagData.id })
         }
+      }
 
-        setContent("")
-        setMediaFiles([])
-        setMediaUrls([])
-        onPostCreated?.()
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message)
-      }
+      setContent("")
+      setMediaFiles([])
+      setMediaUrls([])
+      setError("")
+      onPostCreated?.()
+    } catch (err: any) {
+      setError(err.message || "An error occurred while submitting the post.")
     } finally {
       setIsLoading(false)
     }
@@ -289,9 +297,9 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
             handleMediaUpload(e.target.files)
           }
           // Reset the input so the same file can be selected again
-          e.target.value = ""
+          if (fileInputRef.current) fileInputRef.current.value = ""
         }}
       />
     </div>
   )
-}
+    }
