@@ -60,7 +60,7 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
     media_urls,
     media_type,
     reply_to,
-    profiles!inner(username, display_name, avatar_url)
+    profiles!inner(username, display_name, avatar_url,is_verified)
   `)
           .order("created_at", { ascending: false })
           .limit(20)
