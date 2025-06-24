@@ -57,6 +57,8 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
     content,
     created_at,
     user_id,
+    media_urls,
+    media_type,
     reply_to,
     profiles!inner(username, display_name, avatar_url)
   `)
@@ -108,8 +110,8 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
             reposts_count: repostsMap.get(post.id) || 0,
             is_reposted: userRepostsSet.has(post.id),
             reply_to: post.reply_to,
-            media_urls: null,
-            media_type: null,
+            media_urls: post.media_urls,
+            media_type: post.media_type,
             is_repost: false || null,
             repost_user_id: null,
             repost_username: null,
