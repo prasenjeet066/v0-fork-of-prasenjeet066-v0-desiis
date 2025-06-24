@@ -204,14 +204,14 @@ export function PostDetailContent({ postId, userId }: PostDetailContentProps) {
 
         {/* Reply Form */}
         {currentUser && (
-          <div className="border-b p-2">
+          <div className="border-b">
             <CreatePost userId={userId} replyTo={postId} onPostCreated={handleReplyCreated} />
           </div>
         )}
 
         {/* Replies */}
         <div className="divide-y">
-          <h3 className="my-2 text-sm">All Reply</h3>
+          <h3 className="my-2 px-4 border-b">All Reply</h3>
           {replies.map((reply) => (
             <PostCard
               key={reply.id}
