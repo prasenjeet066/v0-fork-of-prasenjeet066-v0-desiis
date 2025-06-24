@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { supabase } from "@/lib/supabase/client"
 import { Search, UserPlus, UserCheck } from "lucide-react"
 import Link from "next/link"
+import { VerificationBadge } from "@/components/badge/verification-badge"
 
 interface SearchDialogProps {
   open: boolean
@@ -22,6 +23,7 @@ interface User {
   avatar_url: string | null
   followers_count: number
   is_following: boolean
+  is_verified: boolean
 }
 
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
@@ -52,7 +54,8 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           username,
           display_name,
           bio,
-          avatar_url
+          avatar_url,
+          is_verified
         `)
         .or(`username.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
         .limit(20)
@@ -86,6 +89,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             ...u,
             followers_count: followerCountMap.get(u.id) || 0,
             is_following: followingIds.has(u.id),
+            is_verified: u.is_verified || false,
           })) || []
 
         setUsers(usersWithFollowStatus)
@@ -154,7 +158,10 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                       <AvatarFallback>{searchUser.display_name?.charAt(0)?.toUpperCase() || "ব"}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-sm lg:text-base truncate">{searchUser.display_name}</p>
+                      <p className="font-semibold text-sm lg:text-base truncate flex items-center gap-1">
+                        {searchUser.display_name}
+                        {searchUser.is_verified && <VerificationBadge className="h-3 w-3" />}
+                      </p>
                       <p className="text-xs lg:text-sm text-gray-500 truncate">@{searchUser.username}</p>
                       {searchUser.bio && (
                         <p className="text-xs lg:text-sm text-gray-600 mt-1 line-clamp-1">{searchUser.bio}</p>

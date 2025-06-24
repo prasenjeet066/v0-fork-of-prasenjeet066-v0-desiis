@@ -8,9 +8,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { supabase } from "@/lib/supabase/client"
 import { createPostSchema } from "@/lib/validations/post"
-import { Loader2, ImageIcon, Smile, Hash, AtSign, X } from "lucide-react"
+import { Loader2, ImageIcon, Smile, Hash, AtSign, X, AlertCircle } from "lucide-react"
 import { VideoPlayer } from "@/components/media/video-player"
 import { ImageViewer } from "@/components/media/image-viewer"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface CreatePostProps {
   userId: string
@@ -18,29 +19,58 @@ interface CreatePostProps {
   onPostCreated?: () => void
 }
 
+interface MediaFile {
+  file: File
+  url: string
+  type: "image" | "video"
+}
+
 export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) {
   const [content, setContent] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [mediaFiles, setMediaFiles] = useState<File[]>([])
-  const [mediaUrls, setMediaUrls] = useState<string[]>([])
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])
   const [isUploadingMedia, setIsUploadingMedia] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  
-  // Improved handleMediaUpload
+
+  // Improved media validation
+  const validateMediaFile = (file: File): string | null => {
+    const maxSize = 50 * 1024 * 1024 // 50MB
+    const allowedImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+    const allowedVideoTypes = ["video/mp4", "video/webm", "video/mov", "video/avi"]
+
+    if (file.size > maxSize) {
+      return "File size must be less than 50MB"
+    }
+
+    if (!allowedImageTypes.includes(file.type) && !allowedVideoTypes.includes(file.type)) {
+      return "Only images (JPEG, PNG, GIF, WebP) and videos (MP4, WebM, MOV, AVI) are allowed"
+    }
+
+    return null
+  }
+
+  // Improved handleMediaUpload with better error handling
   const handleMediaUpload = async (files: FileList) => {
     if (files.length === 0) return
 
-    const validFiles = Array.from(files).filter((file) => {
-      const isValidType = file.type.startsWith("image/") || file.type.startsWith("video/")
-      const isValidSize = file.size <= 10 * 1024 * 1024 // 10MB
-      return isValidType && isValidSize
+    // Validate files first
+    const validationErrors: string[] = []
+    const validFiles: File[] = []
+
+    Array.from(files).forEach((file, index) => {
+      const error = validateMediaFile(file)
+      if (error) {
+        validationErrors.push(`File ${index + 1}: ${error}`)
+      } else {
+        validFiles.push(file)
+      }
     })
 
-    if (validFiles.length === 0) {
-      setError("Please select valid image or video files (max 10MB each)")
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join("; "))
       return
     }
 
@@ -53,51 +83,114 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
     setError("")
 
     try {
-      // Upload all files in parallel
-      const uploadResults = await Promise.all(validFiles.map(async (file) => {
-        const fileExt = file.name.split(".").pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-        const filePath = `posts/${userId}/${fileName}`
+      // Create preview URLs first
+      const newMediaFiles: MediaFile[] = validFiles.map((file) => ({
+        file,
+        url: URL.createObjectURL(file),
+        type: file.type.startsWith("video/") ? "video" : "image",
+      }))
 
-        const { data, error: uploadError } = await supabase.storage
-          .from("post-media")
-          .upload(filePath, file, {
+      // Update state immediately for better UX
+      setMediaFiles((prev) => [...prev, ...newMediaFiles])
+
+      // Upload files to Supabase storage
+      const uploadPromises = validFiles.map(async (file, index) => {
+        try {
+          const fileExt = file.name.split(".").pop()?.toLowerCase()
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+          const filePath = `posts/${userId}/${fileName}`
+
+          console.log(`Uploading file: ${fileName}, Size: ${file.size}, Type: ${file.type}`)
+
+          const { data, error: uploadError } = await supabase.storage.from("post-media").upload(filePath, file, {
             cacheControl: "3600",
             upsert: false,
           })
 
-        if (uploadError) {
-          throw new Error(uploadError.message || "Upload error")
+          if (uploadError) {
+            console.error(`Upload error for file ${fileName}:`, uploadError)
+            throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`)
+          }
+
+          console.log(`Upload successful for ${fileName}:`, data)
+
+          // Get public URL
+          const { data: urlData } = supabase.storage.from("post-media").getPublicUrl(filePath)
+
+          if (!urlData?.publicUrl) {
+            throw new Error(`Failed to get public URL for ${file.name}`)
+          }
+
+          console.log(`Public URL for ${fileName}:`, urlData.publicUrl)
+
+          return {
+            originalIndex: mediaFiles.length + index,
+            publicUrl: urlData.publicUrl,
+          }
+        } catch (err) {
+          console.error(`Error processing file ${file.name}:`, err)
+          throw err
         }
+      })
 
-        // Get public URL (this is always safe, but the file must be public in the bucket policy)
-        const { data: urlData, error: urlError } = await supabase
-          .storage
-          .from("post-media")
-          .getPublicUrl(filePath)
+      const uploadResults = await Promise.allSettled(uploadPromises)
 
-        if (urlError || !urlData?.publicUrl) {
-          throw new Error("Failed to get public URL for uploaded file.")
-        }
+      // Update URLs with actual Supabase URLs
+      setMediaFiles((prev) => {
+        const updated = [...prev]
+        uploadResults.forEach((result, index) => {
+          if (result.status === "fulfilled") {
+            const targetIndex = result.value.originalIndex
+            if (updated[targetIndex]) {
+              // Clean up blob URL
+              URL.revokeObjectURL(updated[targetIndex].url)
+              updated[targetIndex].url = result.value.publicUrl
+            }
+          }
+        })
+        return updated
+      })
 
-        return { file, url: urlData.publicUrl }
-      }))
-
-      setMediaFiles((prev) => [...prev, ...uploadResults.map(u => u.file)])
-      setMediaUrls((prev) => [...prev, ...uploadResults.map(u => u.url)])
-      setError("")
+      // Check for any failed uploads
+      const failedUploads = uploadResults.filter((result) => result.status === "rejected")
+      if (failedUploads.length > 0) {
+        const errorMessages = failedUploads.map((result, index) => `File ${index + 1}: ${result.reason}`)
+        setError(`Some uploads failed: ${errorMessages.join("; ")}`)
+      }
     } catch (err: any) {
+      console.error("Media upload error:", err)
       setError(err.message || "Failed to upload media. Please try again.")
+
+      // Clean up any blob URLs on error
+      mediaFiles.forEach((media) => {
+        if (media.url.startsWith("blob:")) {
+          URL.revokeObjectURL(media.url)
+        }
+      })
+
+      // Reset media files on error
+      setMediaFiles([])
     } finally {
       setIsUploadingMedia(false)
-      // Reset file input so user can re-select files
-      if (fileInputRef.current) fileInputRef.current.value = ""
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
     }
   }
 
   const removeMedia = (index: number) => {
-    setMediaFiles((prev) => prev.filter((_, i) => i !== index))
-    setMediaUrls((prev) => prev.filter((_, i) => i !== index))
+    setMediaFiles((prev) => {
+      const updated = [...prev]
+      const mediaToRemove = updated[index]
+
+      // Clean up blob URL if it exists
+      if (mediaToRemove.url.startsWith("blob:")) {
+        URL.revokeObjectURL(mediaToRemove.url)
+      }
+
+      return updated.filter((_, i) => i !== index)
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,8 +201,18 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
     try {
       const validatedData = createPostSchema.parse({ content, replyTo })
 
+      // Check if any media is still uploading
+      const hasUploadingMedia = mediaFiles.some((media) => media.url.startsWith("blob:"))
+      if (hasUploadingMedia) {
+        setError("Please wait for media uploads to complete")
+        return
+      }
+
       // Extract hashtags from content
       const hashtags = content.match(/#[a-zA-Z0-9_\u0980-\u09FF]+/g) || []
+
+      // Prepare media URLs (only use successfully uploaded ones)
+      const uploadedMediaUrls = mediaFiles.filter((media) => !media.url.startsWith("blob:")).map((media) => media.url)
 
       const { data: postData, error: postError } = await supabase
         .from("posts")
@@ -117,15 +220,14 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
           user_id: userId,
           content: validatedData.content,
           reply_to: validatedData.replyTo || null,
-          media_urls: mediaUrls.length > 0 ? mediaUrls : null,
-          media_type: mediaUrls.length > 0
-            ? (mediaFiles[0]?.type.startsWith("video/") ? "video" : "image")
-            : null,
+          media_urls: uploadedMediaUrls.length > 0 ? uploadedMediaUrls : null,
+          media_type: uploadedMediaUrls.length > 0 ? (mediaFiles[0]?.type === "video" ? "video" : "image") : null,
         })
         .select()
         .single()
 
       if (postError) {
+        console.error("Post creation error:", postError)
         setError(postError.message)
         return
       }
@@ -133,22 +235,36 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
       // Process hashtags
       for (const hashtag of hashtags) {
         const tagName = hashtag.slice(1) // Remove # symbol
-        const { data: hashtagData, error: hashtagError } = await supabase
-          .from("hashtags")
-          .upsert({ name: tagName })
-          .select()
-          .single()
-        if (!hashtagError && hashtagData) {
-          await supabase.from("post_hashtags").insert({ post_id: postData.id, hashtag_id: hashtagData.id })
+        try {
+          const { data: hashtagData, error: hashtagError } = await supabase
+            .from("hashtags")
+            .upsert({ name: tagName }, { onConflict: "name" })
+            .select()
+            .single()
+
+          if (!hashtagError && hashtagData) {
+            await supabase.from("post_hashtags").insert({ post_id: postData.id, hashtag_id: hashtagData.id })
+          }
+        } catch (hashtagErr) {
+          console.error(`Error processing hashtag ${tagName}:`, hashtagErr)
+          // Don't fail the entire post for hashtag errors
         }
       }
 
+      // Clean up blob URLs
+      mediaFiles.forEach((media) => {
+        if (media.url.startsWith("blob:")) {
+          URL.revokeObjectURL(media.url)
+        }
+      })
+
+      // Reset form
       setContent("")
       setMediaFiles([])
-      setMediaUrls([])
       setError("")
       onPostCreated?.()
     } catch (err: any) {
+      console.error("Post submission error:", err)
       setError(err.message || "An error occurred while submitting the post.")
     } finally {
       setIsLoading(false)
@@ -159,10 +275,10 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
     if (textareaRef.current) {
       const start = textareaRef.current.selectionStart
       const end = textareaRef.current.selectionEnd
-      
+
       const newContent = content.substring(0, start) + text + content.substring(end)
       setContent(newContent)
-      
+
       // Set cursor position after inserted text
       setTimeout(() => {
         if (textareaRef.current) {
@@ -183,9 +299,15 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
             <AvatarFallback>{"U"}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            {replyTo !== null && (
-  <a href={"profile/" + replyTo}>{"Reply to @" + replyTo}</a>
-)}
+            {replyTo && (
+              <div className="mb-2 text-sm text-gray-600">
+                <span>Replying to </span>
+                <a href={`/profile/${replyTo}`} className="text-blue-600 hover:underline">
+                  @{replyTo}
+                </a>
+              </div>
+            )}
+
             <Textarea
               ref={textareaRef}
               placeholder="কী ঘটছে?"
@@ -197,18 +319,18 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
             />
 
             {/* Media preview */}
-            {mediaUrls.length > 0 && (
+            {mediaFiles.length > 0 && (
               <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg overflow-hidden">
-                {mediaUrls.map((url, index) => (
+                {mediaFiles.map((media, index) => (
                   <div key={index} className="relative">
-                    {mediaFiles[index]?.type.startsWith("video/") ? (
-                      <VideoPlayer src={url} className="w-full h-32 rounded" />
+                    {media.type === "video" ? (
+                      <VideoPlayer src={media.url} className="w-full h-32 rounded" muted={true} />
                     ) : (
                       <img
-                        src={url || "/placeholder.svg"}
+                        src={media.url || "/placeholder.svg"}
                         alt={`Upload ${index + 1}`}
                         className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90"
-                        onClick={() => setSelectedImage(url)}
+                        onClick={() => setSelectedImage(media.url)}
                       />
                     )}
                     <Button
@@ -220,6 +342,11 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
                     >
                       <X className="h-3 w-3" />
                     </Button>
+                    {media.url.startsWith("blob:") && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded">
+                        <Loader2 className="h-4 w-4 animate-spin text-white" />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -235,7 +362,13 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
               />
             )}
 
-            {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+            {/* Error Alert */}
+            {error && (
+              <Alert variant="destructive" className="mt-3">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
             <div className="flex items-center justify-between mt-3 lg:mt-4">
               <div className="flex items-center gap-1 lg:gap-2">
@@ -245,6 +378,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
                   size="sm"
                   onClick={() => insertText("#")}
                   className="text-blue-600 hover:bg-blue-50 p-2"
+                  disabled={isLoading}
                 >
                   <Hash className="h-4 w-4" />
                 </Button>
@@ -254,6 +388,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
                   size="sm"
                   onClick={() => insertText("@")}
                   className="text-blue-600 hover:bg-blue-50 p-2"
+                  disabled={isLoading}
                 >
                   <AtSign className="h-4 w-4" />
                 </Button>
@@ -263,7 +398,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
                   size="sm"
                   className="text-blue-600 hover:bg-blue-50 p-2"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploadingMedia || mediaUrls.length >= 4}
+                  disabled={isUploadingMedia || mediaFiles.length >= 4 || isLoading}
                 >
                   {isUploadingMedia ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
                 </Button>
@@ -277,7 +412,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
 
               <Button
                 type="submit"
-                disabled={!content.trim() || remainingChars < 0 || isLoading}
+                disabled={!content.trim() || remainingChars < 0 || isLoading || isUploadingMedia}
                 className="rounded-full px-4 lg:px-6 text-sm lg:text-base"
                 size="sm"
               >
@@ -300,10 +435,8 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
           if (e.target.files && e.target.files.length > 0) {
             handleMediaUpload(e.target.files)
           }
-          // Reset the input so the same file can be selected again
-          if (fileInputRef.current) fileInputRef.current.value = ""
         }}
       />
     </div>
   )
-    }
+}

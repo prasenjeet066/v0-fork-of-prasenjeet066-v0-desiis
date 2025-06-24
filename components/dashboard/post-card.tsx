@@ -4,12 +4,12 @@ import { useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Heart, MessageCircle, Repeat2, Share, CheckCircle } from "lucide-react"
+import { Heart, MessageCircle, Repeat2, Share } from "lucide-react"
 import Link from "next/link"
 import { ReplyDialog } from "./reply-dialog"
 import { RepostDialog } from "./repost-dialog"
 import { PostActionsMenu } from "./post-actions-menu"
-//import { VerificationBadge } from "@/components/badge/verification-badge"
+import { VerificationBadge } from "@/components/badge/verification-badge"
 interface PostCardProps {
   post: {
     id: string
@@ -44,7 +44,7 @@ interface PostCardProps {
 export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, onReply }: PostCardProps) {
   const [showReplyDialog, setShowReplyDialog] = useState(false)
   const [showRepostDialog, setShowRepostDialog] = useState(false)
-  const isRepost = post.is_repost;
+  const isRepost = post.is_repost
   const formatContent = (content: string) => {
     return content
       .replace(
@@ -114,7 +114,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     >
                       <span className="font-semibold text-sm flex items-center gap-1">
                         {post.display_name}
-                        {post.is_verified && <></>}
+                        {post.is_verified && <VerificationBadge className="h-3 w-3" />}
                       </span>
                     </Link>
                     <span className="text-gray-500 text-sm">@{post.username}</span>
