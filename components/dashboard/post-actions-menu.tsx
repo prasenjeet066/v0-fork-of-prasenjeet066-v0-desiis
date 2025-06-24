@@ -44,13 +44,7 @@ export function PostActionsMenu({ post, currentUserId, onPostUpdated, onPostDele
   
 // or for react-router-dom: import { useLocation } from 'react-router-dom';
 
-  const router = useRouter();
-  const pathname = router.pathname;
-
-  const isProfilePage = pathname.startsWith('/profile/');
-// Pass as prop similarly
-//<PostActionsMenu ... isProfilePage={isProfilePage} />
-  const isOwnPost = post.user_id === currentUserId
+  
 
   const handleDelete = async () => {
     setIsLoading(true)
@@ -168,7 +162,7 @@ export function PostActionsMenu({ post, currentUserId, onPostUpdated, onPostDele
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {isOwnPost && isProfilePage ? (
+          {isOwnPost ? (
             <>
               <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
                 <Edit className="mr-2 h-4 w-4" />
