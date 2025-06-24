@@ -1,44 +1,64 @@
-"use client"
-
-import type React from "react"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { supabase } from "@/lib/supabase/client"
-import { Loader2, ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/lib/supabase/client";
+import { Loader2, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState("")
-  const [error, setError] = useState("")
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [canSubmit, setCanSubmit] = useState(false);
+  const [userEmail, setUserEmail] = useState(""); // For sending reset
+
+  const handleTry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setMessage("");
+    setCanSubmit(false);
+
+    // Try to find user by email or username
+    const { data, error } = await supabase
+      .from('profiles') // Adjust table name if needed
+      .select('email')
+      .or(`email.eq.${input},username.eq.${input}`)
+      .single();
+
+    if (error || !data) {
+      setError("No account found with this email or username.");
+    } else {
+      setUserEmail(data.email); // Save for reset
+      setCanSubmit(true);
+      setMessage("Account found! Now you can reset your password.");
+    }
+    setIsLoading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-    setMessage("")
-
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setMessage("");
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
-      })
-
+      });
       if (error) {
-        setError(error.message)
+        setError(error.message);
       } else {
-        setMessage("Check your email for the password reset link!")
+        setMessage("Check your email for the password reset link!");
       }
-    } catch (err) {
-      setError("An unexpected error occurred")
+    } catch {
+      setError("An unexpected error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -54,21 +74,21 @@ export function ForgotPasswordForm() {
           </div>
           <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
           <CardDescription className="text-center">
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email or username and click Try to see if you have an account.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={canSubmit ? handleSubmit : handleTry} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="input">Email or Username</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="input"
+                type="text"
+                placeholder="Enter your email or username"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isLoading || canSubmit}
               />
             </div>
 
@@ -76,13 +96,13 @@ export function ForgotPasswordForm() {
 
             {message && <div className="text-sm text-green-600 text-center">{message}</div>}
 
-            <Button type="submit" className="w-full" disabled={isLoading || !email}>
+            <Button type="submit" className="w-full" disabled={isLoading || !input}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Send Reset Link
+              {canSubmit ? "Submit" : "Try"}
             </Button>
           </form>
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+                 }
