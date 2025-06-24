@@ -183,9 +183,9 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
             <AvatarFallback>{"U"}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            {replyTo!==null (
-            <a href={"profile/"+replyTo}>{"Reply to @"+replyTo}</a>):<></>
-            }
+            {replyTo !== null && (
+  <a href={"profile/" + replyTo}>{"Reply to @" + replyTo}</a>
+)}
             <Textarea
               ref={textareaRef}
               placeholder="কী ঘটছে?"
