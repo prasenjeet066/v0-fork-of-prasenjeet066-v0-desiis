@@ -302,4 +302,4 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
       />
     </>
   )
-}
+  }
