@@ -25,6 +25,7 @@ interface Post {
   media_urls: string[] | null
   media_type: string | null
   is_repost: boolean
+  is_verified: boolean 
   repost_user_id: string | null
   repost_username: string | null
   repost_display_name: string | null
@@ -110,6 +111,7 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
             reposts_count: repostsMap.get(post.id) || 0,
             is_reposted: userRepostsSet.has(post.id),
             reply_to: post.reply_to,
+            is_verified:post.profiles.is_verified,
             media_urls: post.media_urls,
             media_type: post.media_type,
             is_repost: false || null,
