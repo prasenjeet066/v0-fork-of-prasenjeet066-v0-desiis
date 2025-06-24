@@ -468,9 +468,9 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
               </div>
 
               <div className="space-y-2">
-                <h1 className="text-xl font-bold">{profileData.display_name} {isVerified &&
+                <h1 className="text-xl font-bold">{profileData.display_name} <div>{isVerified &&
                 <VerificationBadge/>
-                }</h1>
+                }</div></h1>
                 <p className="text-gray-500">@{profileData.username}</p>
 
                 {profileData.bio && <p className="text-gray-900">{profileData.bio}</p>}
