@@ -9,7 +9,7 @@ import Link from "next/link"
 import { ReplyDialog } from "./reply-dialog"
 import { RepostDialog } from "./repost-dialog"
 import { PostActionsMenu } from "./post-actions-menu"
-import { VerificationBadge } from "@/components/badge/verification-badge"
+//import { VerificationBadge } from "@/components/badge/verification-badge"
 interface PostCardProps {
   post: {
     id: string
@@ -114,7 +114,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     >
                       <span className="font-semibold text-sm flex items-center gap-1">
                         {post.display_name}
-                        {post.is_verified && <VerificationBadge className="h-4 w-4 text-black"/>}
+                        {post.is_verified && <></>}
                       </span>
                     </Link>
                     <span className="text-gray-500 text-sm">@{post.username}</span>
