@@ -1,10 +1,10 @@
-import React from "react";
+import type React from "react"
 
 export interface VerificationBadgeProps {
-  verified?: boolean;
-  label?: string;
-  size?: number; // px
-  className?: string;
+  verified?: boolean
+  label?: string
+  size?: number // px
+  className?: string
 }
 
 /**
@@ -21,7 +21,7 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
   size = 24,
   className = "",
 }) => {
-  if (!verified) return null;
+  if (!verified) return null
   return (
     <span
       className={`inline-flex items-center ${className}`}
@@ -44,17 +44,12 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
             stroke="#000"
             strokeWidth="0.936"
           />
-          <path
-            d="M9 12L11 14L15 10"
-            stroke="#000"
-            strokeWidth="0.936"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <path d="M9 12L11 14L15 10" stroke="#000" strokeWidth="0.936" strokeLinecap="round" strokeLinejoin="round" />
         </g>
       </svg>
     </span>
-  );
-};
+  )
+}
 
-export default VerificationBadge;
+export { VerificationBadge }
+export default VerificationBadge
