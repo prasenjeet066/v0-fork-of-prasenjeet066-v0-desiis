@@ -365,7 +365,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
       )}
     </div>
   )
-  const isVerified = profileData?.is_verified || false;
+  //const isVerified = profileData?.is_verified || false;
   return (
     <div className="min-h-screen bg-gray-50 bengali-font">
       {/* Mobile header */}
@@ -468,9 +468,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
               </div>
 
               <div className="space-y-2">
-                <h1 className="text-xl font-bold">{profileData.display_name} <div>{isVerified &&
-                <VerificationBadge/>
-                }</div></h1>
+                <h1 className="text-xl font-bold">{profileData.display_name} </h1>
                 <p className="text-gray-500">@{profileData.username}</p>
 
                 {profileData.bio && <p className="text-gray-900">{profileData.bio}</p>}
