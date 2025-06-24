@@ -135,6 +135,8 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
             content,
             created_at,
             user_id,
+            media_urls,
+    media_type,
             reply_to
           `)
           .eq("user_id", profile.id)
@@ -150,6 +152,8 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
             content,
             created_at,
             user_id,
+            media_urls,
+    media_type,
             reply_to
           `)
           .eq("user_id", profile.id)
@@ -163,9 +167,12 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
           .select(`
             post_id,
             created_at,
+            
             posts!inner(
               id,
               content,
+              media_urls,
+    media_type,
               created_at,
               user_id,
               reply_to
@@ -243,8 +250,8 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         reposts_count: repostsMap.get(post.id) || 0,
         is_reposted: userRepostsSet.has(post.id),
         reply_to: post.reply_to,
-        media_urls: null,
-        media_type: null,
+        media_urls: post.media_urls,
+        media_type: post.media_type,
         is_repost: false,
         repost_user_id: null,
         repost_username: null,
