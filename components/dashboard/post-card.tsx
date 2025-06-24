@@ -44,7 +44,7 @@ interface PostCardProps {
 export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, onReply }: PostCardProps) {
   const [showReplyDialog, setShowReplyDialog] = useState(false)
   const [showRepostDialog, setShowRepostDialog] = useState(false)
-
+  const isRepost = post.is_repost;
   const formatContent = (content: string) => {
     return content
       .replace(
