@@ -114,7 +114,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     >
                       <span className="font-semibold text-sm flex items-center gap-1">
                         {post.display_name}
-                        {post.is_verified && <VerificationBadge className="h-3 w-3" />}
+                        {post.is_verified && <VerificationBadge verified={true} size={12} className="h-3 w-3" />}
                       </span>
                     </Link>
                     <span className="text-gray-500 text-sm">@{post.username}</span>

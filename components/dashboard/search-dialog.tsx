@@ -160,7 +160,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-sm lg:text-base truncate flex items-center gap-1">
                         {searchUser.display_name}
-                        {searchUser.is_verified && <VerificationBadge className="h-3 w-3" />}
+                        {searchUser.is_verified && <VerificationBadge verified={true} size={12} className="h-3 w-3" />}
                       </p>
                       <p className="text-xs lg:text-sm text-gray-500 truncate">@{searchUser.username}</p>
                       {searchUser.bio && (

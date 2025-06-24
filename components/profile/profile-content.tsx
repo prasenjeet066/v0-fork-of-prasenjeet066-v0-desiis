@@ -30,7 +30,7 @@ interface ProfileData {
   location: string | null
   created_at: string
   posts_count: number
-  is_verified: boolean 
+  is_verified: boolean
   followers_count: number
   following_count: number
   is_following: boolean
@@ -56,6 +56,7 @@ interface Post {
   repost_username: string | null
   repost_display_name: string | null
   repost_created_at: string | null
+  is_verified: boolean
 }
 
 export function ProfileContent({ username, currentUserId }: ProfileContentProps) {
@@ -246,6 +247,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         username: profile.username,
         display_name: profile.display_name,
         avatar_url: profile.avatar_url,
+        is_verified: profile.is_verified,
         likes_count: likesMap.get(post.id) || 0,
         is_liked: userLikesSet.has(post.id),
         reposts_count: repostsMap.get(post.id) || 0,
@@ -468,7 +470,10 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
               </div>
 
               <div className="space-y-2">
-                <h1 className="text-xl font-bold">{profileData.display_name} </h1>
+                <h1 className="text-xl font-bold flex items-center gap-2">
+                  {profileData.display_name}
+                  {profileData.is_verified && <VerificationBadge verified={true} size={20} className="h-5 w-5" />}
+                </h1>
                 <p className="text-gray-500">@{profileData.username}</p>
 
                 {profileData.bio && <p className="text-gray-900">{profileData.bio}</p>}

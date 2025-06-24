@@ -10,6 +10,7 @@ import { Search, UserPlus, UserCheck } from "lucide-react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { LogOut, Menu, X } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { VerificationBadge } from "@/components/verification-badge"
 
 interface User {
   id: string
@@ -19,6 +20,7 @@ interface User {
   avatar_url: string | null
   followers_count: number
   is_following: boolean
+  is_verified?: boolean
 }
 
 export function ExploreContent() {
@@ -57,6 +59,7 @@ export function ExploreContent() {
           display_name,
           bio,
           avatar_url,
+          is_verified,
           followers:follows!following_id(count)
         `)
         .or(`username.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
@@ -189,7 +192,12 @@ export function ExploreContent() {
                             <AvatarFallback>{searchUser.display_name?.charAt(0)?.toUpperCase() || "ব"}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-semibold">{searchUser.display_name}</p>
+                            <p className="font-semibold flex items-center gap-1">
+                              {searchUser.display_name}
+                              {searchUser.is_verified && (
+                                <VerificationBadge verified={true} size={12} className="h-3 w-3" />
+                              )}
+                            </p>
                             <p className="text-sm text-gray-500">@{searchUser.username}</p>
                             {searchUser.bio && <p className="text-sm text-gray-600 mt-1">{searchUser.bio}</p>}
                             <p className="text-xs text-gray-500">{searchUser.followers_count} অনুসরণকারী</p>

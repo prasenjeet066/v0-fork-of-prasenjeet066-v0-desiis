@@ -7,9 +7,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Sidebar } from "@/components/dashboard/sidebar"
-import { LogOut, Menu, X, Heart, UserPlus, MessageCircle, Repeat2, CheckCircle } from "lucide-react"
+import { LogOut, Menu, X, Heart, UserPlus, MessageCircle, Repeat2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
+import { VerificationBadge } from "@/components/verification-badge"
 
 interface Notification {
   id: string
@@ -353,7 +354,7 @@ export function NotificationsContent() {
                                 <span className="font-semibold flex items-center gap-1">
                                   {notification.from_user.display_name}
                                   {notification.from_user.is_verified && (
-                                    <CheckCircle className="h-3 w-3 text-black fill-current" />
+                                    <VerificationBadge verified={true} size={12} className="h-3 w-3" />
                                   )}
                                 </span>
                                 <span className="text-gray-500"> @{notification.from_user.username}</span>
