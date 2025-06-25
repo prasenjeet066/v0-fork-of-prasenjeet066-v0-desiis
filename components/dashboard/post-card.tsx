@@ -246,6 +246,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 <Button
                   variant="ghost"
                   size="sm"
+                  disabled={post.is_repost}
                   className={`${post.is_reposted ? "text-green-600" : "text-gray-500"} hover:text-green-600 p-1 lg:p-2`}
                   onClick={(e) => {
                     e.stopPropagation()
