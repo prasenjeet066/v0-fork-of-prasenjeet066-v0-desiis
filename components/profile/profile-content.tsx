@@ -168,6 +168,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
           .from("reposts")
           .select(`
             post_id,
+          
             created_at,
             
             posts!inner(
@@ -522,25 +523,20 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
                   value="posts"
                   className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
                 >
-                  পোস্ট
+                  Posts
                 </TabsTrigger>
                 <TabsTrigger
                   value="replies"
                   className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
                 >
-                  উত্তর
+                  Reply
                 </TabsTrigger>
-                <TabsTrigger
-                  value="reposts"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
-                >
-                  রিপোস্ট
-                </TabsTrigger>
+                
                 <TabsTrigger
                   value="media"
                   className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
                 >
-                  মিডিয়া
+                  Media
                 </TabsTrigger>
               </TabsList>
 
@@ -552,9 +548,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
                 {renderTabContent(replies, "এখনো কোনো উত্তর নেই")}
               </TabsContent>
 
-              <TabsContent value="reposts" className="mt-0">
-                {renderTabContent(reposts, "এখনো কোনো রিপোস্ট নেই")}
-              </TabsContent>
+            
 
               <TabsContent value="media" className="mt-0">
                 {renderTabContent(media, "এখনো কোনো মিডিয়া নেই")}
