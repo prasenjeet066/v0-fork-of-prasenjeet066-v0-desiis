@@ -25,7 +25,7 @@ export function Sidebar({ profile, onSignOut }: SidebarProps) {
     <div className="h-full flex flex-col p-3 z-50">
       {/* Close button for mobile */}
       <div className="lg:hidden flex justify-between items-center mb-4 pb-2 border-b">
-        <h1 className="text-xl font-bold logo-font">desiiseb</h1>
+        <h1 className="text-xl font-bold logo-font">Cōdes</h1>
         <Button variant="ghost" size="icon" onClick={() => window.dispatchEvent(new Event("closeSidebar"))}>
           <X className="h-5 w-5" />
         </Button>
