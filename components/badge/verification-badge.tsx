@@ -1,10 +1,11 @@
-import type React from "react"
+import type React from "react";
 
 export interface VerificationBadgeProps {
-  verified?: boolean
-  label?: string
-  size?: number // px
-  className?: string
+  verified?: boolean;
+  label?: string;
+  fill?: string; // This prop will now work
+  size?: number; // px
+  className?: string;
 }
 
 /**
@@ -13,15 +14,17 @@ export interface VerificationBadgeProps {
  * @param verified - Whether the badge is shown (default: true)
  * @param label - Tooltip text (default: "Verified")
  * @param size - SVG size in px (default: 24)
+ * @param fill - The fill color for the badge (default: "#ffff")
  * @param className - Additional classes
  */
 const VerificationBadge: React.FC<VerificationBadgeProps> = ({
   verified = true,
   label = "Verified",
   size = 24,
+  fill = "#0000", // Default fill color
   className = "",
 }) => {
-  if (!verified) return null
+  if (!verified) return null;
   return (
     <span
       className={`inline-flex items-center ${className}`}
@@ -30,33 +33,10 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
       aria-label={label}
       data-testid="verification-badge"
     >
-      <svg
-  width={size}
-  height={size}
-  viewBox="-2.4 -2.4 28.80 28.80"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
-  aria-hidden="true"
->
-  <defs>
-    <linearGradient id="badge-gradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stopColor="#a18cd1"/>
-      <stop offset="100%" stopColor="#6a82fb"/>
-    </linearGradient>
-  </defs>
-  <g>
-    <path
-      d="M11.5283 1.5999C11.7686 1.29437 12.2314 1.29437 12.4717 1.5999L14.2805 3.90051C14.4309 4.09173 14.6818 4.17325 14.9158 4.10693L17.7314 3.3089C18.1054 3.20292 18.4799 3.475 18.4946 3.863[...]"
-      fill="url(#badge-gradient)"
-      stroke="#000"
-      strokeWidth="0.936"
-    />
-    <path d="M9 12L11 14L15 10" stroke="#000" strokeWidth="0.936" strokeLinecap="round" strokeLinejoin="round" />
-  </g>
-</svg>
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M14.6563 5.24291C15.4743 5.88358 16 6.8804 16 8C16 9.11964 15.4743 10.1165 14.6562 10.7572C14.7816 11.7886 14.4485 12.8652 13.6568 13.6569C12.8651 14.4486 11.7885 14.7817 10.7571 14.6563C10.1164 15.4743 9.1196 16 8 16C6.88038 16 5.88354 15.4743 5.24288 14.6562C4.21141 14.7817 3.13481 14.4485 2.34312 13.6568C1.55143 12.8652 1.2183 11.7886 1.34372 10.7571C0.525698 10.1164 0 9.1196 0 8C0 6.88038 0.525715 5.88354 1.34376 5.24288C1.21834 4.21141 1.55147 3.13481 2.34316 2.34312C3.13485 1.55143 4.21145 1.2183 5.24291 1.34372C5.88358 0.525698 6.8804 0 8 0C9.11964 0 10.1165 0.525732 10.7572 1.3438C11.7886 1.21838 12.8652 1.55152 13.6569 2.3432C14.4486 3.13488 14.7817 4.21146 14.6563 5.24291ZM12.2071 6.20711L10.7929 4.79289L7 8.58579L5.20711 6.79289L3.79289 8.20711L7 11.4142L12.2071 6.20711Z" fill="#002fff"></path> </g></svg>
     </span>
-  )
-}
+  );
+};
 
-export { VerificationBadge }
-export default VerificationBadge
+export { VerificationBadge };
+export default VerificationBadge;
