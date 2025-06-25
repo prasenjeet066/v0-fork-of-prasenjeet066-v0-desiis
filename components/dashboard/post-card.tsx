@@ -242,7 +242,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   <MessageCircle className="h-4 w-4 mr-1" />
                   <span className="text-xs lg:text-sm">{post.replies_count || 0}</span>
                 </Button>
-
+                
                 <Button
                   variant="ghost"
                   size="sm"
@@ -255,7 +255,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   <Repeat2 className="h-4 w-4 mr-1" />
                   <span className="text-xs lg:text-sm">{post.reposts_count}</span>
                 </Button>
-
+                
                 <Button
                   variant="ghost"
                   size="sm"
