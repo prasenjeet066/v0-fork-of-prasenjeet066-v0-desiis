@@ -299,7 +299,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
             <AvatarFallback>{"U"}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            {replyTo && (
+            {replyTo!==="undefined" && (
               <div className="mb-2 text-sm text-gray-600">
                 <span>Replying to </span>
                 <a href={`/profile/${replyTo}`} className="text-blue-600 hover:underline">
@@ -413,7 +413,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
               <Button
                 type="submit"
                 disabled={!content.trim() || remainingChars < 0 || isLoading || isUploadingMedia}
-                className="rounded-full px-4 lg:px-6 text-sm lg:text-base"
+                className="rounded-full ml-4 px-4 lg:px-6 text-sm lg:text-base"
                 size="sm"
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
