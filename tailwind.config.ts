@@ -10,6 +10,9 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+        fontFamily: {
+        racing: ['"Racing Sans One"'],
+        },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
