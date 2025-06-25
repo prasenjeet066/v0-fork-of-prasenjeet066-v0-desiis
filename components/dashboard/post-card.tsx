@@ -79,6 +79,52 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
     window.location.href = `/post/${post.id}`
   }
 
+  const renderMedia = (mediaUrls: string[], mediaType: string | null) => {
+    if (!mediaUrls || mediaUrls.length === 0) return null
+
+    return (
+      <div className="mt-2 rounded-lg overflow-hidden border">
+        {mediaType === "video" ? (
+          <video src={mediaUrls[0]} className="w-full max-h-96 object-cover" controls />
+        ) : mediaType === "gif" ? (
+          <div className={`grid gap-1 ${mediaUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+            {mediaUrls.slice(0, 4).map((url, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={url || "/placeholder.svg"}
+                  alt="Post media"
+                  className="w-full h-32 lg:h-48 object-cover cursor-pointer hover:opacity-90"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    window.open(url, "_blank")
+                  }}
+                />
+                {url.includes("giphy.com") && (
+                  <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">GIF</div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={`grid gap-1 ${mediaUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+            {mediaUrls.slice(0, 4).map((url, index) => (
+              <img
+                key={index}
+                src={url || "/placeholder.svg"}
+                alt="Post media"
+                className="w-full h-32 lg:h-48 object-cover cursor-pointer hover:opacity-90"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  window.open(url, "_blank")
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <>
       <div className="border-b hover:bg-gray-50 transition-colors cursor-pointer" onClick={handlePostClick}>
@@ -114,7 +160,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     >
                       <span className="font-semibold text-sm flex items-center gap-1">
                         {post.display_name}
-                        {post.is_verified && <VerificationBadge verified={true} size={15} className="h-5 w-5" />}
+                        {post.is_verified && <VerificationBadge verified={true} size={12} className="h-3 w-3" />}
                       </span>
                     </Link>
                     <span className="text-gray-500 text-sm">@{post.username}</span>
@@ -128,28 +174,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
                   />
                   {/* Media display for original post */}
-                  {post.media_urls && post.media_urls.length > 0 && (
-                    <div className="mt-2 rounded-lg overflow-hidden border">
-                      {post.media_type === "video" ? (
-                        <video src={post.media_urls[0]} className="w-full max-h-48 object-cover" controls />
-                      ) : (
-                        <div className={`grid gap-1 ${post.media_urls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-                          {post.media_urls.slice(0, 4).map((url, index) => (
-                            <img
-                              key={index}
-                              src={url || "/placeholder.svg"}
-                              alt="Post media"
-                              className="w-full h-24 object-cover cursor-pointer hover:opacity-90"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                window.open(url, "_blank")
-                              }}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {renderMedia(post.media_urls, post.media_type)}
                 </div>
               </div>
             </div>
@@ -174,7 +199,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 >
                   <span className="font-semibold text-sm lg:text-base truncate flex items-center gap-1">
                     {post.display_name}
-                    {post.is_verified && <VerificationBadge verified={true} size={15} className="h-5 w-5" />}
+                    {post.is_verified && <VerificationBadge className="h-4 w-4 text-black" />}
                   </span>
                 </Link>
                 <Link
@@ -189,15 +214,13 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   {formatDistanceToNow(displayTime, { addSuffix: true })}
                 </span>
                 <div className="ml-auto">
-  {post.user_id !== currentUserId && (
-    <PostActionsMenu
-      post={post}
-      currentUserId={currentUserId}
-      onPostUpdated={onReply}
-      onPostDeleted={onReply}
-    />
-  )}
-</div>
+                  <PostActionsMenu
+                    post={post}
+                    currentUserId={currentUserId}
+                    onPostUpdated={onReply}
+                    onPostDeleted={onReply}
+                  />
+                </div>
               </div>
 
               {!post.is_repost && (
@@ -208,28 +231,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
               )}
 
               {/* Media display for non-repost */}
-              {post.media_urls && post.media_urls.length > 0 && (
-                <div className="mb-3 rounded-lg overflow-hidden border">
-                  {post.media_type === "video" ? (
-                    <video src={post.media_urls[0]} className="w-full max-h-96 object-cover" controls />
-                  ) : (
-                    <div className={`grid gap-1 ${post.media_urls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-                      {post.media_urls.slice(0, 4).map((url, index) => (
-                        <img
-                          key={index}
-                          src={url || "/placeholder.svg"}
-                          alt="Post media"
-                          className="w-full h-32 lg:h-48 object-cover cursor-pointer hover:opacity-90"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            window.open(url, "_blank")
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+              {!post.is_repost && renderMedia(post.media_urls, post.media_type)}
 
               <div className="flex items-center justify-between max-w-sm lg:max-w-md">
                 <Button
@@ -244,11 +246,10 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   <MessageCircle className="h-4 w-4 mr-1" />
                   <span className="text-xs lg:text-sm">{post.replies_count || 0}</span>
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
-                  disabled={post.is_repost}
                   className={`${post.is_reposted ? "text-green-600" : "text-gray-500"} hover:text-green-600 p-1 lg:p-2`}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -258,7 +259,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   <Repeat2 className="h-4 w-4 mr-1" />
                   <span className="text-xs lg:text-sm">{post.reposts_count}</span>
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -305,4 +306,4 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
       />
     </>
   )
-  }
+}

@@ -12,6 +12,7 @@ import { Loader2, ImageIcon, Smile, Hash, AtSign, X, AlertCircle } from "lucide-
 import { VideoPlayer } from "@/components/media/video-player"
 import { ImageViewer } from "@/components/media/image-viewer"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { GiphyPicker } from "@/components/giphy/giphy-picker"
 
 interface CreatePostProps {
   userId: string
@@ -25,12 +26,20 @@ interface MediaFile {
   type: "image" | "video"
 }
 
+interface GiphyMedia {
+  url: string
+  type: "gif" | "sticker"
+  id: string
+}
+
 export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) {
   const [content, setContent] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])
+  const [giphyMedia, setGiphyMedia] = useState<GiphyMedia[]>([])
   const [isUploadingMedia, setIsUploadingMedia] = useState(false)
+  const [showGiphyPicker, setShowGiphyPicker] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
@@ -50,6 +59,30 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
     }
 
     return null
+  }
+
+  // Handle Giphy selection
+  const handleGiphySelect = (gif: any, type: "gif" | "sticker") => {
+    const giphyItem: GiphyMedia = {
+      url: gif.images.original.url,
+      type,
+      id: gif.id,
+    }
+
+    // Check if we already have 4 media items (files + giphy)
+    if (mediaFiles.length + giphyMedia.length >= 4) {
+      setError("You can only add up to 4 media items")
+      return
+    }
+
+    setGiphyMedia((prev) => [...prev, giphyItem])
+    setShowGiphyPicker(false)
+    setError("")
+  }
+
+  // Remove Giphy media
+  const removeGiphyMedia = (index: number) => {
+    setGiphyMedia((prev) => prev.filter((_, i) => i !== index))
   }
 
   // Improved handleMediaUpload with better error handling
@@ -74,7 +107,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
       return
     }
 
-    if (mediaFiles.length + validFiles.length > 4) {
+    if (mediaFiles.length + giphyMedia.length + validFiles.length > 4) {
       setError("You can only upload up to 4 media files")
       return
     }
@@ -211,8 +244,22 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
       // Extract hashtags from content
       const hashtags = content.match(/#[a-zA-Z0-9_\u0980-\u09FF]+/g) || []
 
-      // Prepare media URLs (only use successfully uploaded ones)
+      // Prepare media URLs (combine uploaded files and Giphy media)
       const uploadedMediaUrls = mediaFiles.filter((media) => !media.url.startsWith("blob:")).map((media) => media.url)
+      const giphyUrls = giphyMedia.map((gif) => gif.url)
+      const allMediaUrls = [...uploadedMediaUrls, ...giphyUrls]
+
+      // Determine media type
+      let mediaType = null
+      if (allMediaUrls.length > 0) {
+        if (mediaFiles.some((media) => media.type === "video")) {
+          mediaType = "video"
+        } else if (giphyMedia.length > 0) {
+          mediaType = "gif"
+        } else {
+          mediaType = "image"
+        }
+      }
 
       const { data: postData, error: postError } = await supabase
         .from("posts")
@@ -220,8 +267,8 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
           user_id: userId,
           content: validatedData.content,
           reply_to: validatedData.replyTo || null,
-          media_urls: uploadedMediaUrls.length > 0 ? uploadedMediaUrls : null,
-          media_type: uploadedMediaUrls.length > 0 ? (mediaFiles[0]?.type === "video" ? "video" : "image") : null,
+          media_urls: allMediaUrls.length > 0 ? allMediaUrls : null,
+          media_type: mediaType,
         })
         .select()
         .single()
@@ -261,6 +308,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
       // Reset form
       setContent("")
       setMediaFiles([])
+      setGiphyMedia([])
       setError("")
       onPostCreated?.()
     } catch (err: any) {
@@ -290,6 +338,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
   }
 
   const remainingChars = 280 - content.length
+  const totalMediaCount = mediaFiles.length + giphyMedia.length
 
   return (
     <div className="border-b p-3 lg:p-4 bengali-font bg-white">
@@ -299,7 +348,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
             <AvatarFallback>{"U"}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            {replyTo!==="undefined" && (
+            {replyTo && (
               <div className="mb-2 text-sm text-gray-600">
                 <span>Replying to </span>
                 <a href={`/profile/${replyTo}`} className="text-blue-600 hover:underline">
@@ -319,10 +368,11 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
             />
 
             {/* Media preview */}
-            {mediaFiles.length > 0 && (
+            {(mediaFiles.length > 0 || giphyMedia.length > 0) && (
               <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg overflow-hidden">
+                {/* Regular media files */}
                 {mediaFiles.map((media, index) => (
-                  <div key={index} className="relative">
+                  <div key={`media-${index}`} className="relative">
                     {media.type === "video" ? (
                       <VideoPlayer src={media.url} className="w-full h-32 rounded" muted={true} />
                     ) : (
@@ -349,6 +399,30 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
                     )}
                   </div>
                 ))}
+
+                {/* Giphy media */}
+                {giphyMedia.map((gif, index) => (
+                  <div key={`gif-${index}`} className="relative">
+                    <img
+                      src={gif.url || "/placeholder.svg"}
+                      alt={`${gif.type} ${index + 1}`}
+                      className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90"
+                      onClick={() => setSelectedImage(gif.url)}
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6"
+                      onClick={() => removeGiphyMedia(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                    <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">
+                      {gif.type.toUpperCase()}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -360,6 +434,17 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
                 isOpen={!!selectedImage}
                 onClose={() => setSelectedImage(null)}
               />
+            )}
+
+            {/* Giphy Picker */}
+            {showGiphyPicker && (
+              <div className="mt-3">
+                <GiphyPicker
+                  onGifSelect={(gif) => handleGiphySelect(gif, "gif")}
+                  onStickerSelect={(sticker) => handleGiphySelect(sticker, "sticker")}
+                  onClose={() => setShowGiphyPicker(false)}
+                />
+              </div>
             )}
 
             {/* Error Alert */}
@@ -398,11 +483,18 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
                   size="sm"
                   className="text-blue-600 hover:bg-blue-50 p-2"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploadingMedia || mediaFiles.length >= 4 || isLoading}
+                  disabled={isUploadingMedia || totalMediaCount >= 4 || isLoading}
                 >
                   {isUploadingMedia ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
                 </Button>
-                <Button type="button" variant="ghost" size="sm" className="text-gray-500 p-2" disabled>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-blue-600 hover:bg-blue-50 p-2"
+                  onClick={() => setShowGiphyPicker(!showGiphyPicker)}
+                  disabled={totalMediaCount >= 4 || isLoading}
+                >
                   <Smile className="h-4 w-4" />
                 </Button>
                 <span className={`text-sm ml-2 ${remainingChars < 20 ? "text-red-500" : "text-gray-500"}`}>
@@ -413,7 +505,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
               <Button
                 type="submit"
                 disabled={!content.trim() || remainingChars < 0 || isLoading || isUploadingMedia}
-                className="rounded-full ml-4 px-4 lg:px-6 text-sm lg:text-base"
+                className="rounded-full px-4 lg:px-6 text-sm lg:text-base"
                 size="sm"
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

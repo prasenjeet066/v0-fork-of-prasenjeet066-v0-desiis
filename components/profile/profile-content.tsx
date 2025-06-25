@@ -381,7 +381,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
               </Button>
               <Button variant="ghost" size="icon" asChild>
                 <Link href={`/profile/${currentProfile?.username}`}>
-                  <Avatar className="h-10 w-10">
+                  <Avatar className="h-8 w-8">
                     <AvatarImage src={currentProfile?.avatar_url || undefined} />
                     <AvatarFallback className="text-xs">
                       {currentProfile?.display_name?.charAt(0)?.toUpperCase() || "ব"}
@@ -412,7 +412,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         {/* Main content */}
         <div className="flex-1 max-w-2xl mx-auto">
           <div className="border-x bg-white min-h-screen">
-            <div className="sticky top-0 bg-white/50 z-30 backdrop-blur-md border-b px-4 py-3">
+            <div className="sticky top-0 bg-white/50 z-50 backdrop-blur-md border-b px-4 py-3">
               <h2 className="text-xl font-bold">{profileData.display_name}</h2>
               <p className="text-sm text-gray-500">{profileData.posts_count} পোস্ট</p>
             </div>
@@ -432,7 +432,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
             {/* Profile Header */}
             <div className="p-4 border-b relative">
               <div className="flex items-start justify-between mb-4">
-                <Avatar className="w-25 h-25 -mt-10 border-4 border-white">
+                <Avatar className="w-20 h-20 -mt-10 border-4 border-white">
                   <AvatarImage src={profileData.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
                     {profileData.display_name?.charAt(0)?.toUpperCase() || "ব"}
@@ -444,7 +444,6 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
                     <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
                       প্রোফাইল সম্পাদনা
                     </Button>
-                    
                   ) : currentUserId ? (
                     <Button variant={profileData.is_following ? "outline" : "default"} onClick={handleFollow}>
                       {profileData.is_following ? (
@@ -518,28 +517,28 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-white rounded-none h-12">
+              <TabsList className="grid w-full grid-cols-4 bg-white border-b rounded-none h-12">
                 <TabsTrigger
                   value="posts"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-gray-700 rounded-none"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
                 >
                   পোস্ট
                 </TabsTrigger>
                 <TabsTrigger
                   value="replies"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-gray-700 rounded-none"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
                 >
                   উত্তর
                 </TabsTrigger>
                 <TabsTrigger
                   value="reposts"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-gray-700 rounded-none"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
                 >
                   রিপোস্ট
                 </TabsTrigger>
                 <TabsTrigger
                   value="media"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-gray-700 rounded-none"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
                 >
                   মিডিয়া
                 </TabsTrigger>
