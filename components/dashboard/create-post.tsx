@@ -341,8 +341,8 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
   const totalMediaCount = mediaFiles.length + giphyMedia.length
 
   return (
-    <div className="flex w-full">
-    <div className="border-b p-3 lg:p-4 bengali-font h-full bg-white">
+    <div className="flex row w-full">
+    <div className="border-b p-3 lg:p-4 bengali-font h-auto bg-white">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 lg:gap-3">
           <Avatar className="cursor-pointer h-10 w-10 lg:h-12 lg:w-12">
