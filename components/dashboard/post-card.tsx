@@ -4,7 +4,7 @@ import { useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Heart,MoreHorizontal, MessageCircle, Repeat2, Share } from "lucide-react"
+import { Heart,MoreHorizontal,Loader2, MessageCircle, Repeat2, Share } from "lucide-react"
 import Link from "next/link"
 import { ReplyDialog } from "./reply-dialog"
 import { RepostDialog } from "./repost-dialog"
@@ -52,6 +52,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   const [showReplyDialog, setShowReplyDialog] = useState(false)
   const [showRepostDialog, setShowRepostDialog] = useState(false)
   const postUrl = extractFirstUrl(post.content)
+  const [repostLoading, setRepostLoading] = useState(false)
   const hasMedia = post.media_urls && post.media_urls.length > 0
   const formatContent = (content: string) => {
     return content
@@ -61,14 +62,17 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
       )
       .replace(/@([a-zA-Z0-9_]+)/g, '<span class="text-blue-600 hover:underline cursor-pointer">@$1</span>')
   }
-
+ 
   const handleReplyClick = () => {
     setShowReplyDialog(true)
   }
 
-  const handleRepostClick = () => {
-    setShowRepostDialog(true)
-  }
+  const handleRepostClick = async () => {
+  setRepostLoading(true)
+  // If onRepost returns a Promise, you can await it.
+  await onRepost(post.id, post.is_reposted)
+  setRepostLoading(false)
+}
 
   const handleDialogReply = () => {
     setShowReplyDialog(false)
@@ -341,21 +345,24 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 </Button>
 
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`${
-                    post.is_reposted
-                      ? "text-green-600 bg-green-50"
-                      : "text-gray-500 hover:text-green-600 hover:bg-green-50"
-                  } p-2 rounded-full`}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleRepostClick()
-                  }}
-                >
-                  <Repeat2 className="h-4 w-4 mr-1" />
-                  <span className="text-xs lg:text-sm">{post.reposts_count}</span>
-                </Button>
+  variant="ghost"
+  size="sm"
+  className={`
+    ${post.is_reposted ? "text-green-600 bg-green-50"
+      : "text-gray-500 hover:text-green-600 hover:bg-green-50"} p-2 rounded-full`}
+  onClick={async (e) => {
+    e.stopPropagation()
+    await handleRepostClick()
+  }}
+  disabled={repostLoading}
+>
+  {repostLoading ? (
+    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+  ) : (
+    <Repeat2 className="h-4 w-4 mr-1" />
+  )}
+  <span className="text-xs lg:text-sm">{post.reposts_count}</span>
+</Button>
 
                 <Button
                   variant="ghost"
