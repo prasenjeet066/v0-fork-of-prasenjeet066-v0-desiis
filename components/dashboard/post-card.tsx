@@ -4,7 +4,7 @@ import { useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Heart, MessageCircle, Repeat2, Share ,MoreHorizontal} from "lucide-react"
+import { Heart, MessageCircle, Repeat2, Share } from "lucide-react"
 import Link from "next/link"
 import { ReplyDialog } from "./reply-dialog"
 import { RepostDialog } from "./repost-dialog"
@@ -175,7 +175,15 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     <span className="text-gray-500 text-sm">
                       {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                     </span>
-                    
+                    <div className="ml-auto">
+                      <PostActionsMenu
+                        post={post}
+                        currentUserId={currentUserId}
+                        onPostUpdated={onReply}
+                        onPostDeleted={onReply}
+                      />
+                    </div>
+                  </div>
 
                   <div
                     className="text-gray-900 mb-3 whitespace-pre-wrap leading-relaxed"
@@ -238,9 +246,6 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     >
                       <Share className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
                   </div>
                 </div>
               </div>
@@ -298,7 +303,14 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 <span className="text-gray-500 text-xs lg:text-sm">
                   {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                 </span>
-                
+                <div className="ml-auto">
+                  <PostActionsMenu
+                    post={post}
+                    currentUserId={currentUserId}
+                    onPostUpdated={onReply}
+                    onPostDeleted={onReply}
+                  />
+                </div>
               </div>
 
               <div
@@ -363,9 +375,6 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   <Share className="h-4 w-4 mr-1" />
                   <span className="text-xs lg:text-sm">Share</span>
                 </Button>
-                <Button variant="ghost" size="sm" className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
               </div>
             </div>
           </div>
@@ -390,4 +399,5 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
       />
     </>
   )
-}
+      }
+                                        
