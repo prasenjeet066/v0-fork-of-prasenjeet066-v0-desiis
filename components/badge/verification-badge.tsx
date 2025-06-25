@@ -4,18 +4,11 @@ export interface VerificationBadgeProps {
   verified?: boolean
   label?: string
   fill?: string 
-  size?: number // px
+  size?: number
   className?: string
 }
 
-/**
- * VerificationBadge - A badge to indicate verified status, using a custom SVG icon.
- *
- * @param verified - Whether the badge is shown (default: true)
- * @param label - Tooltip text (default: "Verified")
- * @param size - SVG size in px (default: 24)
- * @param className - Additional classes
- */
+
 const VerificationBadge: React.FC<VerificationBadgeProps> = ({
   verified = true,
   label = "Verified",
