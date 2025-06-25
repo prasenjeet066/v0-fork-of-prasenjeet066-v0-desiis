@@ -342,7 +342,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleReplyClick()
+                   // handleReplyClick()
                   }}
                 >
                   <MessageCircle className="h-4 w-4 mr-1" />
@@ -413,13 +413,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
         onReply={handleDialogReply}
       />
 
-      <RepostDialog
-        isOpen={showRepostDialog}
-        onClose={() => setShowRepostDialog(false)}
-        post={post}
-        currentUser={currentUser}
-        onRepost={handleDialogRepost}
-      />
+      
       
     </>
   )
