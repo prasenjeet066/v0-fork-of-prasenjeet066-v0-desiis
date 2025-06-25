@@ -233,19 +233,14 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
+                      className="text-gray-500t-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Share className="h-4 w-4" />
                     </Button>
-                    <div className="ml-auto">
-                      <PostActionsMenu
-                        post={post}
-                        currentUserId={currentUserId}
-                        onPostUpdated={onReply}
-                        onPostDeleted={onReply}
-                      />
-                    </div>
+                    <Button variant="ghost" size="sm" className="text-gray-500t-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
                   </div>
                 </div>
               </div>
@@ -368,14 +363,9 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   <Share className="h-4 w-4 mr-1" />
                   <span className="text-xs lg:text-sm">Share</span>
                 </Button>
-                <div className="ml-auto">
-                      <PostActionsMenu
-                        post={post}
-                        currentUserId={currentUserId}
-                        onPostUpdated={onReply}
-                        onPostDeleted={onReply}
-                      />
-                    </div>
+                <Button variant="ghost" size="sm" className="text-gray-500t-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
               </div>
             </div>
           </div>
