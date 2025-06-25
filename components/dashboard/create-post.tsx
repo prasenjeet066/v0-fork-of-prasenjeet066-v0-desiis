@@ -437,15 +437,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
             )}
 
             {/* Giphy Picker */}
-            {showGiphyPicker && (
-              <div className="mt-3">
-                <GiphyPicker
-                  onGifSelect={(gif) => handleGiphySelect(gif, "gif")}
-                  onStickerSelect={(sticker) => handleGiphySelect(sticker, "sticker")}
-                  onClose={() => setShowGiphyPicker(false)}
-                />
-              </div>
-            )}
+            
 
             {/* Error Alert */}
             {error && (
@@ -505,7 +497,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
               <Button
                 type="submit"
                 disabled={!content.trim() || remainingChars < 0 || isLoading || isUploadingMedia}
-                className="rounded-full px-4 lg:px-6 text-sm lg:text-base"
+                className="rounded-full ml-2 px-4 lg:px-6 text-sm lg:text-base"
                 size="sm"
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -529,6 +521,15 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
           }
         }}
       />
+      {showGiphyPicker && (
+              <div className="mt-3 w-full">
+                <GiphyPicker
+                  onGifSelect={(gif) => handleGiphySelect(gif, "gif")}
+                  onStickerSelect={(sticker) => handleGiphySelect(sticker, "sticker")}
+                  onClose={() => setShowGiphyPicker(false)}
+                />
+              </div>
+            )}
     </div>
   )
 }
