@@ -159,7 +159,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 </Link>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-col items-left gap-2">
+                  <div className="flex flex-col items-left gap-1">
                     <Link
                       href={`/profile/${post.username}`}
                       className="hover:underline"
@@ -290,7 +290,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
             </Link>
 
             <div className="flex-1 min-w-0">
-              <div className="flex flex-col items-left gap-2">
+              <div className="flex flex-col items-left gap-1">
                     <Link
                       href={`/profile/${post.username}`}
                       className="hover:underline"
