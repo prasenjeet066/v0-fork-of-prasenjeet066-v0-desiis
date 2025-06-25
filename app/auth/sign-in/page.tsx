@@ -97,7 +97,7 @@ export default function SignInPage() {
                 disabled={isLoading}
               />
               {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
-            <Link href="/auth/forgot-password" className="text-sm text-right text-blue-600 hover:underline mt-2">
+            <Link href="/auth/forgot-password" className="text-sm text-right text-blue-600 hover:underline pt-2">
                 পাসওয়ার্ড ভুলে গেছেন?
               </Link>
             </div>
