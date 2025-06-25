@@ -412,7 +412,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         {/* Main content */}
         <div className="flex-1 max-w-2xl mx-auto">
           <div className="border-x bg-white min-h-screen">
-            <div className="sticky top-0 bg-white/50 z-50 backdrop-blur-md border-b px-4 py-3">
+            <div className="sticky top-0 bg-white/50 z-30 backdrop-blur-md border-b px-4 py-3">
               <h2 className="text-xl font-bold">{profileData.display_name}</h2>
               <p className="text-sm text-gray-500">{profileData.posts_count} পোস্ট</p>
             </div>
@@ -517,7 +517,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-white border-b rounded-none h-12">
+              <TabsList className="grid w-full grid-cols-4 bg-white  rounded-none h-12">
                 <TabsTrigger
                   value="posts"
                   className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
