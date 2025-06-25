@@ -8,7 +8,7 @@ export default function HomePage() {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-6xl font-bold text-gray-900 mb-6" style={{ fontFamily: "Alkatra, cursive" }}>
-            desiiseb
+            Cōdes
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto" style={{ fontFamily: "Tiro Bangla, serif" }}>
             কথোপকথনে যোগ দিন। আপনার চিন্তাভাবনা শেয়ার করুন। অন্যদের সাথে সংযুক্ত হন। আধুনিক বিশ্বের জন্য পুনর্কল্পিত মাইক্রোব্লগিং অভিজ্ঞতা।
