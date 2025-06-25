@@ -68,7 +68,7 @@ export default function SignInPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 bengali-font">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold logo-font">desiiseb</CardTitle>
+          <CardTitle className="text-2xl font-bold logo-font">Cōdes</CardTitle>
           <CardDescription>আবার স্বাগতম</CardDescription>
         </CardHeader>
         <CardContent>
