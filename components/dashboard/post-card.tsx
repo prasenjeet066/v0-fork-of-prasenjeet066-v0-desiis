@@ -159,7 +159,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 </Link>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-col items-left gap-2 mb-2">
+                  <div className="flex flex-col items-left gap-2">
                     <Link
                       href={`/profile/${post.username}`}
                       className="hover:underline"
@@ -170,10 +170,10 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                         {post.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
                       </span>
                     </Link>
-                    <div className="flex flex-row items-center gap-2" >
-                    <span className="text-gray-500 text-sm">@{post.username}</span>
-                    <span className="text-gray-500 text-sm">·</span>
-                    <span className="text-gray-500 text-sm">
+                    <div className="flex flex-row items-center gap-[2px]" >
+                    <span className="text-gray-500 text-[10px]">@{post.username}</span>
+                    <span className="text-gray-500 text-[10px]">·</span>
+                    <span className="text-gray-500 text-[10px]">
                       {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                     </span>
                     </div>
@@ -290,7 +290,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
             </Link>
 
             <div className="flex-1 min-w-0">
-              <div className="flex flex-col items-left gap-2 mb-2">
+              <div className="flex flex-col items-left gap-2">
                     <Link
                       href={`/profile/${post.username}`}
                       className="hover:underline"
@@ -301,14 +301,13 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                         {post.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
                       </span>
                     </Link>
-                    <div className="flex flex-row items-center gap-2" >
-                    <span className="text-gray-500 text-sm">@{post.username}</span>
-                    <span className="text-gray-500 text-sm">·</span>
-                    <span className="text-gray-500 text-sm">
+                    <div className="flex flex-row items-center gap-[2px]" >
+                    <span className="text-gray-500 text-[10px]">@{post.username}</span>
+                    <span className="text-gray-500 text-[10px]">·</span>
+                    <span className="text-gray-500 text-[10px]">
                       {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                     </span>
                     </div>
-                  </div>
 
               <div
                 className="text-gray-900 mb-3 whitespace-pre-wrap text-sm lg:text-base leading-relaxed"
