@@ -373,7 +373,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
     <div className="min-h-screen bg-gray-50 bengali-font">
       {/* Mobile header */}
       <div className="lg:hidden bg-white border-b px-4 py-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold logo-font">desiiseb</h1>
+        <h1 className="text-xl font-bold logo-font">Cōdes</h1>
         <div className="flex items-center gap-2">
           {currentUserId && (
             <>
