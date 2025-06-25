@@ -189,13 +189,15 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   {formatDistanceToNow(displayTime, { addSuffix: true })}
                 </span>
                 <div className="ml-auto">
-                  <PostActionsMenu
-                    post={post}
-                    currentUserId={currentUserId}
-                    onPostUpdated={onReply}
-                    onPostDeleted={onReply}
-                  />
-                </div>
+  {post.user_id !== currentUserId && (
+    <PostActionsMenu
+      post={post}
+      currentUserId={currentUserId}
+      onPostUpdated={onReply}
+      onPostDeleted={onReply}
+    />
+  )}
+</div>
               </div>
 
               {!post.is_repost && (
