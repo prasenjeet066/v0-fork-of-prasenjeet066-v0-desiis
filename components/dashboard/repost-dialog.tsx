@@ -48,7 +48,12 @@ export function RepostDialog({ isOpen, onClose, post, currentUser, onRepost }: R
       // Create a new post that quotes the original
       const { error } = await supabase.from("posts").insert({
         user_id: currentUser.id,
-        content: content.trim(),
+        content: post.content,
+        user_id: userId,
+          
+  
+          media_urls: post.media_urls,
+          media_type: post.media_type,
         repost_of: post.id,
       })
 
