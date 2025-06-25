@@ -39,7 +39,7 @@ export function RepostDialog({ isOpen, onClose, post, currentUser, onRepost }: R
       setIsLoading(false)
     }
   }
-  
+  await handleSimpleRepost();
  /**
   const handleQuoteRepost = async () => {
     if (!currentUser || !content.trim()) return
