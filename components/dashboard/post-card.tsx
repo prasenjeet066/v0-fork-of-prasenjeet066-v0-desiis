@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Heart,MoreHorizontal,Loader2, MessageCircle, Repeat2, Share } from "lucide-react"
 import Link from "next/link"
