@@ -68,7 +68,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
     setShowReplyDialog(true)
   }
 
-  const handleRepost = () => {
+  const handleRepost = async () => {
   setRepostLoading(true);
   try {
     const { error } = await supabase
