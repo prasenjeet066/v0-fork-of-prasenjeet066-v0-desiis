@@ -167,7 +167,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     >
                       <span className="font-semibold flex items-center gap-1">
                         {post.display_name}
-                        {post.is_verified && <VerificationBadge className="h-4 w-4" />}
+                        {post.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
                       </span>
                     </Link>
                     <span className="text-gray-500 text-sm">@{post.username}</span>
@@ -295,7 +295,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 >
                   <span className="font-semibold text-sm lg:text-base truncate flex items-center gap-1">
                     {post.display_name}
-                    {post.is_verified && <VerificationBadge className="h-4 w-4" />}
+                    {post.is_verified && <VerificationBadge className="h-4 w-4" size={15} />}
                   </span>
                 </Link>
                 <span className="text-gray-500 text-sm truncate">@{post.username}</span>
