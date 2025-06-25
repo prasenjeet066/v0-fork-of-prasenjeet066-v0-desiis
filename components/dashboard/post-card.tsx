@@ -225,9 +225,9 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     <Button
   variant="ghost"
   size="sm"
-  onClick={async (e) => {
+  onClick={ (e) => {
     e.stopPropagation();
-    await handleRepost(); // <-- Use your function here
+    handleRepost(); // <-- Use your function here
   }}
   disabled={repostLoading}
 >
@@ -352,9 +352,9 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 <Button
   variant="ghost"
   size="sm"
-  onClick={async (e) => {
+  onClick={(e) => {
     e.stopPropagation();
-    await handleRepost(); // <-- Use your function here
+    handleRepost(); // <-- Use your function here
   }}
   disabled={repostLoading}
 >
