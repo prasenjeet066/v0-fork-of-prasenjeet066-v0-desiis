@@ -225,7 +225,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     <Button
   variant="ghost"
   size="sm"
-  onClick={ (e) => {
+  onClick={ async (e) => {
     e.stopPropagation();
     await handleRepost(); // <-- Use your function here
   }}
@@ -352,7 +352,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 <Button
   variant="ghost"
   size="sm"
-  onClick={(e) => {
+  onClick={async(e) => {
     e.stopPropagation();
     await handleRepost(); // <-- Use your function here
   }}
