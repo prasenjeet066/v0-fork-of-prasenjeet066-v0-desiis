@@ -39,7 +39,8 @@ export function RepostDialog({ isOpen, onClose, post, currentUser, onRepost }: R
       setIsLoading(false)
     }
   }
-
+  
+ /**
   const handleQuoteRepost = async () => {
     if (!currentUser || !content.trim()) return
 
@@ -67,7 +68,7 @@ export function RepostDialog({ isOpen, onClose, post, currentUser, onRepost }: R
     } finally {
       setIsLoading(false)
     }
-  }
+  }**/
 
   return (
     <></>
