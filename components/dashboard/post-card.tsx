@@ -10,7 +10,7 @@ import { ReplyDialog } from "./reply-dialog"
 import { RepostDialog } from "./repost-dialog"
 import { PostActionsMenu } from "./post-actions-menu"
 import { VerificationBadge } from "@/components/badge/verification-badge"
-
+import LinkPreview from '@/components/link-preview';
 interface PostCardProps {
   post: {
     id: string
@@ -42,10 +42,17 @@ interface PostCardProps {
   onReply?: () => void
 }
 
+function extractFirstUrl(text: string) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g
+  const match = text.match(urlRegex)
+  return match ? match[0] : null
+}
+
 export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, onReply }: PostCardProps) {
   const [showReplyDialog, setShowReplyDialog] = useState(false)
   const [showRepostDialog, setShowRepostDialog] = useState(false)
-
+  const postUrl = extractFirstUrl(post.content)
+  const hasMedia = post.media_urls && post.media_urls.length > 0
   const formatContent = (content: string) => {
     return content
       .replace(
@@ -313,7 +320,10 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 className="text-gray-900 mt-2 mb-3 whitespace-pre-wrap text-sm lg:text-base leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
               />
-
+               {!hasMedia && postUrl && (
+    <LinkPreview
+      url={postUrl}/>
+  )}
               {renderMedia(post.media_urls, post.media_type)}
 
               <div className="flex items-center justify-between max-w-sm lg:max-w-md mt-3">
