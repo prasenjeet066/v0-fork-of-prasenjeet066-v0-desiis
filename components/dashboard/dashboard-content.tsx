@@ -64,7 +64,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
             </SheetContent>
           </Sheet>
 
-          <h1 className="text-xl font-bold logo-font">desiiseb</h1>
+          <h1 className="text-xl font-bold logo-font">Cōdes</h1>
 
           <Link href={`/profile/${profile?.username}`}>
             <Avatar className="h-8 w-8">
