@@ -290,24 +290,25 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
             </Link>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <Link
-                  href={`/profile/${post.username}`}
-                  className="hover:underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <span className="font-semibold text-sm lg:text-base truncate flex items-center gap-1">
-                    {post.display_name}
-                    {post.is_verified && <VerificationBadge className="h-4 w-4" size={15} />}
-                  </span>
-                </Link>
-                <span className="text-gray-500 text-sm truncate">@{post.username}</span>
-                <span className="text-gray-500 text-sm">·</span>
-                <span className="text-gray-500 text-xs lg:text-sm">
-                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                </span>
-                
-              </div>
+              <div className="flex flex-col items-center gap-2 mb-2">
+                    <Link
+                      href={`/profile/${post.username}`}
+                      className="hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span className="font-semibold flex items-center gap-1">
+                        {post.display_name}
+                        {post.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
+                      </span>
+                    </Link>
+                    <div className="flex flex-row gap-2" >
+                    <span className="text-gray-500 text-sm">@{post.username}</span>
+                    <span className="text-gray-500 text-sm">·</span>
+                    <span className="text-gray-500 text-sm">
+                      {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                    </span>
+                    </div>
+                  </div>
 
               <div
                 className="text-gray-900 mb-3 whitespace-pre-wrap text-sm lg:text-base leading-relaxed"
