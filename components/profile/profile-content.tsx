@@ -521,20 +521,20 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
               <TabsList className="grid w-full grid-cols-4 bg-white  rounded-none h-12">
                 <TabsTrigger
                   value="posts"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
+                  className="data-[state=active]:border-b-2 w-full pb-2 data-[state=active]:border-blue-500 rounded-none"
                 >
                   Posts
                 </TabsTrigger>
                 <TabsTrigger
                   value="replies"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
+                  className="data-[state=active]:border-b-2 w-full pb-2 data-[state=active]:border-blue-500 rounded-none"
                 >
                   Reply
                 </TabsTrigger>
                 
                 <TabsTrigger
                   value="media"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none"
+                  className="data-[state=active]:border-b-2 w-full pb-2 data-[state=active]:border-blue-500 rounded-none"
                 >
                   Media
                 </TabsTrigger>
