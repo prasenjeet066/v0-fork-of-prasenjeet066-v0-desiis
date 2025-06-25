@@ -175,14 +175,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     <span className="text-gray-500 text-sm">
                       {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                     </span>
-                    <div className="ml-auto">
-                      <PostActionsMenu
-                        post={post}
-                        currentUserId={currentUserId}
-                        onPostUpdated={onReply}
-                        onPostDeleted={onReply}
-                      />
-                    </div>
+                    
                   </div>
 
                   <div
@@ -246,6 +239,14 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     >
                       <Share className="h-4 w-4" />
                     </Button>
+                    <div className="ml-auto">
+                      <PostActionsMenu
+                        post={post}
+                        currentUserId={currentUserId}
+                        onPostUpdated={onReply}
+                        onPostDeleted={onReply}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -303,14 +304,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                 <span className="text-gray-500 text-xs lg:text-sm">
                   {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                 </span>
-                <div className="ml-auto">
-                  <PostActionsMenu
-                    post={post}
-                    currentUserId={currentUserId}
-                    onPostUpdated={onReply}
-                    onPostDeleted={onReply}
-                  />
-                </div>
+                
               </div>
 
               <div
@@ -375,6 +369,14 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   <Share className="h-4 w-4 mr-1" />
                   <span className="text-xs lg:text-sm">Share</span>
                 </Button>
+                <div className="ml-auto">
+                      <PostActionsMenu
+                        post={post}
+                        currentUserId={currentUserId}
+                        onPostUpdated={onReply}
+                        onPostDeleted={onReply}
+                      />
+                    </div>
               </div>
             </div>
           </div>
