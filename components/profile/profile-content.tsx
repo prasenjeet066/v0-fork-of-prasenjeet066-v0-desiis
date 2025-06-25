@@ -523,7 +523,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
                   value="posts"
                   className="data-[state=active]:border-b-2 w-full pb-2 data-[state=active]:border-blue-500 rounded-none"
                 >
-                  Posts
+                  Cōdes
                 </TabsTrigger>
                 <TabsTrigger
                   value="replies"
