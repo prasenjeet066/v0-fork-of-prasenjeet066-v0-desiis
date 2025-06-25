@@ -227,7 +227,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   size="sm"
   onClick={ (e) => {
     e.stopPropagation();
-    handleRepost(); // <-- Use your function here
+    await handleRepost(); // <-- Use your function here
   }}
   disabled={repostLoading}
 >
@@ -354,7 +354,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   size="sm"
   onClick={(e) => {
     e.stopPropagation();
-    handleRepost(); // <-- Use your function here
+    await handleRepost(); // <-- Use your function here
   }}
   disabled={repostLoading}
 >
