@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Savate:ital,wght@0,200..900;1,200..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap");
 
 @layer base {
@@ -107,8 +107,8 @@
 }
 
 .logo-font {
-  font-family:"Savate", sans-serif;
-  font-weight: 900;
+  font-family:"Racing Sans One", sans-serif;
+  font-weight: 600;
 }
 
 /* Video player styles */
