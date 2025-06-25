@@ -301,7 +301,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                         {post.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
                       </span>
                     </Link>
-                    <div className="flex flex-row items-center gap-1" >
+                    <div className="flex flex-row items-center gap-1 -mt-2" >
                     <span className="text-gray-500 text-[10px]">@{post.username}</span>
                     <span className="text-gray-500 text-[10px]">·</span>
                     <span className="text-gray-500 text-[10px]">
@@ -310,7 +310,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                     </div>
 </div>
               <div
-                className="text-gray-900 mb-3 whitespace-pre-wrap text-sm lg:text-base leading-relaxed"
+                className="text-gray-900 mt-2 mb-3 whitespace-pre-wrap text-sm lg:text-base leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
               />
 
