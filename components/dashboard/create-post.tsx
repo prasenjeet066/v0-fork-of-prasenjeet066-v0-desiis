@@ -341,6 +341,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
   const totalMediaCount = mediaFiles.length + giphyMedia.length
 
   return (
+    <>
     <div className="border-b p-3 lg:p-4 bengali-font bg-white">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 lg:gap-3">
@@ -521,6 +522,7 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
           }
         }}
       />
+      </div>
       {showGiphyPicker && (
               <div className="mt-3 w-full">
                 <GiphyPicker
@@ -530,6 +532,6 @@ export function CreatePost({ userId, replyTo, onPostCreated }: CreatePostProps) 
                 />
               </div>
             )}
-    </div>
+    </>
   )
 }
