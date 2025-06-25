@@ -94,7 +94,7 @@ export function GiphyPicker({ onGifSelect, onStickerSelect, onClose }: GiphyPick
   }
 
   return (
-    <div className="bg-white shadow-lg p-4 w-full overflow-hidden">
+    <div className="bg-white p-4 w-full">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Add GIF or Sticker</h3>
         <Button variant="ghost" size="icon" onClick={onClose}>
