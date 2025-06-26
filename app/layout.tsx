@@ -37,6 +37,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        <script type="text/javascript" src="dist/purify.js"></script>
       </head>
       <body className={inter.className}>
         <LanguageProvider>{children}</LanguageProvider>
