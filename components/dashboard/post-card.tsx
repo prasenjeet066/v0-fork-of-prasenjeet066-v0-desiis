@@ -1,17 +1,17 @@
 "use client"
 
-import { useState,useEffect} from "react"
+import { useState, useEffect } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Heart,MoreHorizontal,Loader2, MessageCircle, Repeat2, Share } from "lucide-react"
+import { Heart, MoreHorizontal, Loader2, MessageCircle, Repeat2, Share } from "lucide-react"
 import Link from "next/link"
 import { ReplyDialog } from "./reply-dialog"
-//import { RepostDialog } from "./repost-dialog"
 import { PostActionsMenu } from "./post-actions-menu"
 import { VerificationBadge } from "@/components/badge/verification-badge"
-import LinkPreview from '@/components/link-preview';
+import LinkPreview from '@/components/link-preview'
+
 interface PostCardProps {
   post: {
     id: string
@@ -49,13 +49,32 @@ function extractFirstUrl(text: string) {
   return match ? match[0] : null
 }
 
+type RepostProfile = {
+  username: string
+  display_name: string
+  avatar_url: string | null
+  is_verified?: boolean
+}
+
+type RepostData = {
+  id: string
+  content: string
+  created_at: string
+  user_id: string
+  media_urls: string[] | null
+  media_type: string | null
+  reply_to: string | null
+  profiles: RepostProfile
+}
+
 export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, onReply }: PostCardProps) {
   const [showReplyDialog, setShowReplyDialog] = useState(false)
-  const [showRepostDialog, setShowRepostDialog] = useState(false)
-  const postUrl = extractFirstUrl(post.content)
   const [repostLoading, setRepostLoading] = useState(false)
-  const [repost,setRepost]=useState(null)
+  const [repost, setRepost] = useState<RepostData | null>(null)
+  const postUrl = extractFirstUrl(post.content)
   const hasMedia = post.media_urls && post.media_urls.length > 0
+
+  // Format hashtags and mentions
   const formatContent = (content: string) => {
     return content
       .replace(
@@ -64,116 +83,111 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
       )
       .replace(/@([a-zA-Z0-9_]+)/g, '<span class="text-blue-600 hover:underline cursor-pointer">@$1</span>')
   }
- 
-  const handleReplyClick = () => {
-    setShowReplyDialog(true)
-  }
 
+  // Reply handler
+  const handleReplyClick = () => setShowReplyDialog(true)
+
+  // Repost handler
   const handleRepost = async () => {
-  setRepostLoading(true);
-  try {
-    const { error } = await supabase
-      .from("posts")
-      .insert({ repost_of:post.id ,user_id: currentUser.id });
-
-    if (!error) {
-      setRepostLoading(false);
+    setRepostLoading(true)
+    try {
+      const { error } = await supabase
+        .from("posts")
+        .insert({ repost_of: post.id, user_id: currentUser.id }) // <-- Fixed comma
+      if (!error) {
+        onRepost(post.id, true)
+      }
+    } catch (error) {
+      console.error("Error reposting:", error)
+    } finally {
+      setRepostLoading(false)
     }
-  } catch (error) {
-    console.error("Error reposting:", error);
-  } finally {
-    setRepostLoading(false);
   }
-};
-
-  const handleDialogReply = () => {
-    setShowReplyDialog(false)
-    onReply?.()
-  }
-
-  const handleDialogRepost = () => {
-    setShowRepostDialog(false)
-    onRepost(post.id, post.is_reposted)
-  }
-
-  const handlePostClick = () => {
-    window.location.href = `/post/${post.id}`
-  }
-  useEffect(()=>{
-    async function getRepostf(){
-      if(post.is_repost){
-    const { data: fallbackData, error: fallbackError } = await supabase
-          .from("posts")
+  // Fetch repost data if this is a repost
+  useEffect(() => {
+    const fetchRepost = async () => {
+      if (post.is_repost && post.repost_user_id) {
+        const { data, error } = await supabase
+          .from('posts')
           .select(`
-    id,
-    content,
-    created_at,
-    user_id,
-    media_urls,
-    media_type,
-    reply_to,
-    profiles!inner(username, display_name, avatar_url,is_verified)
-  `).eq("id", post.repost_of)
-      if(data){
-        setRepost(data)
-      }
+            id,
+            content,
+            created_at,
+            user_id,
+            media_urls,
+            media_type,
+            reply_to,
+            profiles:profiles!inner(username, display_name, avatar_url, is_verified)
+          `)
+          .eq('id', post.repost_user_id)
+          .single()
+        if (!error && data) {
+          setRepost(data)
+        }
       }
     }
-    
-    getRepostf()
-  },[post])
-  
-    
-  const renderMedia = (mediaUrls: string[], mediaType: string | null) => {
+    fetchRepost()
+  }, [post])
+
+  // Render image/video/gif media
+  const renderMedia = (mediaUrls: string[] | null, mediaType: string | null) => {
     if (!mediaUrls || mediaUrls.length === 0) return null
-  
-  }
-    return (
-      <div className="mt-3 rounded-lg overflow-hidden border">
-        {mediaType === "video" ? (
+
+    if (mediaType === "video") {
+      return (
+        <div className="mt-3 rounded-lg overflow-hidden border">
           <video src={mediaUrls[0]} className="w-full max-h-96 object-cover" controls />
-        ) : mediaType === "gif" ? (
-          <div className={`grid gap-1 ${mediaUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-            {mediaUrls.slice(0, 4).map((url, index) => (
-              <div key={index} className="relative">
-                <img
-                  src={url || "/placeholder.svg"}
-                  alt="Post media"
-                  className="w-full h-32 lg:h-48 object-cover cursor-pointer hover:opacity-90"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    window.open(url, "_blank")
-                  }}
-                />
-                {url.includes("giphy.com") && (
-                  <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">GIF</div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={`grid gap-1 ${mediaUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-            {mediaUrls.slice(0, 4).map((url, index) => (
+        </div>
+      )
+    }
+    if (mediaType === "gif") {
+      return (
+        <div className={`grid gap-1 ${mediaUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+          {mediaUrls.slice(0, 4).map((url, index) => (
+            <div key={index} className="relative">
               <img
-                key={index}
                 src={url || "/placeholder.svg"}
-                alt="Post media"
+                alt="GIF media"
                 className="w-full h-32 lg:h-48 object-cover cursor-pointer hover:opacity-90"
                 onClick={(e) => {
                   e.stopPropagation()
                   window.open(url, "_blank")
                 }}
               />
-            ))}
-          </div>
-        )}
+              {url.includes("giphy.com") && (
+                <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">GIF</div>
+              )}
+            </div>
+          ))}
+        </div>
+      )
+    }
+    // Default: images
+    return (
+      <div className={`grid gap-1 ${mediaUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+        {mediaUrls.slice(0, 4).map((url, index) => (
+          <img
+            key={index}
+            src={url || "/placeholder.svg"}
+            alt="Post media"
+            className="w-full h-32 lg:h-48 object-cover cursor-pointer hover:opacity-90"
+            onClick={(e) => {
+              e.stopPropagation()
+              window.open(url, "_blank")
+            }}
+          />
+        ))}
       </div>
     )
   }
 
-  if (post.is_repost) {
-    
-    // Repost layout - show repost header and original post
+  // Click to go to post
+  const handlePostClick = () => {
+    window.location.href = `/post/${post.id}`
+  }
+
+  // Render repost layout
+  if (post.is_repost && repost && repost.profiles) {
     return (
       <>
         <div className="border-b hover:bg-gray-50 transition-colors">
@@ -182,65 +196,60 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Repeat2 className="h-4 w-4 text-green-600" />
               <Link
-                href={`/profile/${post.repost_username}`}
+                href={`/profile/${repost.profiles.username}`}
                 className="hover:underline font-medium"
-                onClick={(e) => e.stopPropagation()}
+                onClick={e => e.stopPropagation()}
               >
-                {post.repost_display_name}
+                {repost.profiles.display_name}
               </Link>
               <span>reposted</span>
               <span className="text-gray-400">·</span>
               <span className="text-gray-500 text-xs">
-                {formatDistanceToNow(new Date(post.repost_created_at!), { addSuffix: true })}
+                {formatDistanceToNow(new Date(repost.created_at), { addSuffix: true })}
               </span>
             </div>
           </div>
-
           {/* Original Post */}
           <div className="px-4 pb-4 cursor-pointer" onClick={handlePostClick}>
             <div className="border rounded-xl p-4 bg-white hover:bg-gray-50 transition-colors">
               <div className="flex gap-3">
-                <Link href={`/profile/${post.username}`} className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                <Link href={`/profile/${repost.profiles.username}`} className="flex-shrink-0" onClick={e => e.stopPropagation()}>
                   <Avatar className="cursor-pointer h-10 w-10">
-                    <AvatarImage src={post.avatar_url || undefined} />
-                    <AvatarFallback>{post.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
+                    <AvatarImage src={repost.profiles.avatar_url || undefined} />
+                    <AvatarFallback>{repost.profiles.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
                   </Avatar>
                 </Link>
-
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col items-left gap-1">
                     <Link
-                      href={`/profile/${post.username}`}
+                      href={`/profile/${repost.profiles.username}`}
                       className="hover:underline"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={e => e.stopPropagation()}
                     >
                       <span className="font-semibold flex items-center gap-1">
-                        {post.display_name}
-                        {post.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
+                        {repost.profiles.display_name}
+                        {repost.profiles.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
                       </span>
                     </Link>
-                    <div className="flex flex-row items-center gap-1" >
-                    <span className="text-gray-500 text-[10px]">@{post.username}</span>
-                    <span className="text-gray-500 text-[10px]">·</span>
-                    <span className="text-gray-500 text-[10px]">
-                      {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                    </span>
+                    <div className="flex flex-row items-center gap-1">
+                      <span className="text-gray-500 text-[10px]">@{repost.profiles.username}</span>
+                      <span className="text-gray-500 text-[10px]">·</span>
+                      <span className="text-gray-500 text-[10px]">
+                        {formatDistanceToNow(new Date(repost.created_at), { addSuffix: true })}
+                      </span>
                     </div>
                   </div>
-
                   <div
                     className="text-gray-900 mb-3 whitespace-pre-wrap leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
+                    dangerouslySetInnerHTML={{ __html: formatContent(repost.content) }}
                   />
-
-                  {renderMedia(post.media_urls, post.media_type)}
-
+                  {renderMedia(repost.media_urls, repost.media_type)}
                   <div className="flex items-center justify-between max-w-md mt-3">
                     <Button
                       variant="ghost"
                       size="sm"
                       className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation()
                         handleReplyClick()
                       }}
@@ -248,31 +257,27 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                       <MessageCircle className="h-4 w-4 mr-1" />
                       <span className="text-sm">{post.replies_count || 0}</span>
                     </Button>
-
-                    <Button
-  variant="ghost"
-  size="sm"
-  onClick={ async (e) => {
-    e.stopPropagation();
-    await handleRepost(); // <-- Use your function here
-  }}
-  disabled={repostLoading}
->
-  {repostLoading ? (
-    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-  ) : (
-    <Repeat2 className="h-4 w-4 mr-1" />
-  )}
-  <span className="text-xs lg:text-sm">{post.reposts_count}</span>
-</Button>
-
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`${
-                        post.is_liked ? "text-red-600 bg-red-50" : "text-gray-500 hover:text-red-600 hover:bg-red-50"
-                      } p-2 rounded-full`}
-                      onClick={(e) => {
+                      onClick={async e => {
+                        e.stopPropagation()
+                        await handleRepost()
+                      }}
+                      disabled={repostLoading}
+                    >
+                      {repostLoading ? (
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      ) : (
+                        <Repeat2 className="h-4 w-4 mr-1" />
+                      )}
+                      <span className="text-xs lg:text-sm">{post.reposts_count}</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`${post.is_liked ? "text-red-600 bg-red-50" : "text-gray-500 hover:text-red-600 hover:bg-red-50"} p-2 rounded-full`}
+                      onClick={e => {
                         e.stopPropagation()
                         onLike(post.id, post.is_liked)
                       }}
@@ -280,12 +285,11 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                       <Heart className={`h-4 w-4 mr-1 ${post.is_liked ? "fill-current" : ""}`} />
                       <span className="text-sm">{post.likes_count}</span>
                     </Button>
-
                     <Button
                       variant="ghost"
                       size="sm"
                       className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={e => e.stopPropagation()}
                     >
                       <Share className="h-4 w-4" />
                     </Button>
@@ -293,28 +297,27 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                       variant="ghost"
                       size="sm"
                       className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={e => e.stopPropagation()}
                     >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
-                    
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Dialogs */}
+        {/* Reply Dialog */}
         <ReplyDialog
           isOpen={showReplyDialog}
           onClose={() => setShowReplyDialog(false)}
           post={post}
           currentUser={currentUser}
-          onReply={handleDialogReply}
+          onReply={() => {
+            setShowReplyDialog(false)
+            onReply?.()
+          }}
         />
-
-        
       </>
     )
   }
@@ -325,81 +328,74 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
       <div className="border-b hover:bg-gray-50 transition-colors cursor-pointer" onClick={handlePostClick}>
         <div className="p-4">
           <div className="flex gap-3">
-            <Link href={`/profile/${post.username}`} className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+            <Link href={`/profile/${post.username}`} className="flex-shrink-0" onClick={e => e.stopPropagation()}>
               <Avatar className="cursor-pointer h-10 w-10 lg:h-12 lg:w-12">
                 <AvatarImage src={post.avatar_url || undefined} />
                 <AvatarFallback>{post.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
               </Avatar>
             </Link>
-
             <div className="flex-1 min-w-0">
               <div className="flex flex-col items-left gap-1">
-                    <Link
-                      href={`/profile/${post.username}`}
-                      className="hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span className="font-semibold flex items-center gap-1">
-                        {post.display_name}
-                        {post.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
-                      </span>
-                    </Link>
-                    <div className="flex flex-row items-center gap-1 -mt-2" >
-                    <span className="text-gray-500 text-[10px]">@{post.username}</span>
-                    <span className="text-gray-500 text-[10px]">·</span>
-                    <span className="text-gray-500 text-[10px]">
-                      {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                    </span>
-                    </div>
-</div>
+                <Link
+                  href={`/profile/${post.username}`}
+                  className="hover:underline"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <span className="font-semibold flex items-center gap-1">
+                    {post.display_name}
+                    {post.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
+                  </span>
+                </Link>
+                <div className="flex flex-row items-center gap-1 -mt-2">
+                  <span className="text-gray-500 text-[10px]">@{post.username}</span>
+                  <span className="text-gray-500 text-[10px]">·</span>
+                  <span className="text-gray-500 text-[10px]">
+                    {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                  </span>
+                </div>
+              </div>
               <div
                 className="text-gray-900 mt-2 mb-3 whitespace-pre-wrap text-sm lg:text-base leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
               />
-               {!hasMedia && postUrl && (
-    <LinkPreview
-      url={postUrl}/>
-  )}
+              {!hasMedia && postUrl && (
+                <LinkPreview url={postUrl} />
+              )}
               {renderMedia(post.media_urls, post.media_type)}
-
               <div className="flex items-center justify-between max-w-sm lg:max-w-md mt-3">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation()
-                   // handleReplyClick()
+                    handleReplyClick()
                   }}
                 >
                   <MessageCircle className="h-4 w-4 mr-1" />
                   <span className="text-xs lg:text-sm">{post.replies_count || 0}</span>
                 </Button>
-
-                <Button
-  variant="ghost"
-  size="sm"
-  onClick={async(e) => {
-    e.stopPropagation();
-    await handleRepost(); // <-- Use your function here
-  }}
-  disabled={repostLoading}
->
-  {repostLoading ? (
-    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-  ) : (
-    <Repeat2 className="h-4 w-4 mr-1" />
-  )}
-  <span className="text-xs lg:text-sm">{post.reposts_count}</span>
-</Button>
-
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${
-                    post.is_liked ? "text-red-600 bg-red-50" : "text-gray-500 hover:text-red-600 hover:bg-red-50"
-                  } p-2 rounded-full`}
-                  onClick={(e) => {
+                  onClick={async e => {
+                    e.stopPropagation()
+                    await handleRepost()
+                  }}
+                  disabled={repostLoading}
+                >
+                  {repostLoading ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Repeat2 className="h-4 w-4 mr-1" />
+                  )}
+                  <span className="text-xs lg:text-sm">{post.reposts_count}</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`${post.is_liked ? "text-red-600 bg-red-50" : "text-gray-500 hover:text-red-600 hover:bg-red-50"} p-2 rounded-full`}
+                  onClick={e => {
                     e.stopPropagation()
                     onLike(post.id, post.is_liked)
                   }}
@@ -407,42 +403,39 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   <Heart className={`h-4 w-4 mr-1 ${post.is_liked ? "fill-current" : ""}`} />
                   <span className="text-xs lg:text-sm">{post.likes_count}</span>
                 </Button>
-
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
                 >
                   <Share className="h-4 w-4 mr-1" />
                   <span className="text-xs lg:text-sm">Share</span>
                 </Button>
                 <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Dialogs */}
+      {/* Reply Dialog */}
       <ReplyDialog
         isOpen={showReplyDialog}
         onClose={() => setShowReplyDialog(false)}
         post={post}
         currentUser={currentUser}
-        onReply={handleDialogReply}
+        onReply={() => {
+          setShowReplyDialog(false)
+          onReply?.()
+        }}
       />
-
-      
-      
     </>
   )
-      }
-                                        
+    }
