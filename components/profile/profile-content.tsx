@@ -167,26 +167,34 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
           .limit(20)
 
         // Get user reposts
-        const { data: repostsData } = await supabase
-          .from("reposts")
-          .select(`
-            post_id,
-          
-            created_at,
-            
-            posts!inner(
-              id,
-              content,
-              media_urls,
+        // In the useEffect fetchData function
+const { data: repostsData } = await supabase
+  .from("posts")
+  .select(`
+    id,
+    user_id,
+    content,
+    media_urls,
     media_type,
-              created_at,
-              user_id,
-              reply_to
-            )
-          `)
-          .eq("user_id", profile.id)
-          .order("created_at", { ascending: false })
-          .limit(20)
+    reply_to,
+    repost_of,
+    created_at,
+    profiles!user_id (username, display_name, avatar_url, is_verified),
+    posts!repost_of (
+      id,
+      content,
+      media_urls,
+      media_type,
+      created_at,
+      user_id,
+      reply_to,
+      profiles!user_id (username, display_name, avatar_url, is_verified)
+    )
+  `)
+  .eq("user_id", profile.id)
+  .not("repost_of", "is", null)
+  .order("created_at", { ascending: false })
+  .limit(20);
 
         if (!postsError && postsData) {
           const formattedPosts = await formatPosts(postsData, profile)
@@ -198,11 +206,15 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
           setReplies(formattedReplies)
         }
 
-        if (repostsData) {
+       /* if (repostsData) {
           const repostPosts = repostsData.map((r) => r.posts).filter(Boolean)
           const formattedReposts = await formatPosts(repostPosts, profile)
           setReposts(formattedReposts)
-        }
+        }*/
+        if (repostsData) {
+  const formattedReposts = await formatPosts(repostsData, profile);
+  setReposts(formattedReposts);
+}
 
         // For now, media is empty since we don't have media support yet
         setMedia([])
@@ -215,12 +227,12 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
 
     fetchData()
   }, [username, currentUserId, router])
-
-  const formatPosts = async (postsData: any[], profile: any) => {
+ 
+  /**const formatPosts = async (postsData: any[], profile: any) => {
     const postIds = postsData?.map((p) => p.id) || []
     const [likesData, repostsData] = await Promise.all([
       supabase.from("likes").select("post_id, user_id").in("post_id", postIds),
-      supabase.from("reposts").select("post_id, user_id").in("post_id", postIds),
+      supabase.from("posts").select("*").in("id", postIds),
     ])
 
     const likesMap = new Map()
@@ -234,7 +246,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         userLikesSet.add(like.post_id)
       }
     })
-
+    
     repostsData.data?.forEach((repost) => {
       repostsMap.set(repost.post_id, (repostsMap.get(repost.post_id) || 0) + 1)
       if (repost.user_id === currentUserId) {
@@ -267,7 +279,63 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         repost_created_at: null,
       })) || []
     )
-  }
+  }**/
+  const formatPosts = async (postsData: any[], profile: any) => {
+  const postIds = postsData?.map((p) => p.id) || [];
+  const [likesData, repostsData] = await Promise.all([
+    supabase.from("likes").select("post_id, user_id").in("post_id", postIds),
+    supabase.from("posts").select("id, user_id").in("id", postIds),
+  ]);
+
+  const likesMap = new Map();
+  const userLikesSet = new Set();
+  const repostsMap = new Map();
+  const userRepostsSet = new Set();
+
+  likesData.data?.forEach((like) => {
+    likesMap.set(like.post_id, (likesMap.get(like.post_id) || 0) + 1);
+    if (like.user_id === currentUserId) {
+      userLikesSet.add(like.post_id);
+    }
+  });
+
+  repostsData.data?.forEach((repost) => {
+    repostsMap.set(repost.id, (repostsMap.get(repost.id) || 0) + 1);
+    if (repost.user_id === currentUserId) {
+      userRepostsSet.add(repost.id);
+    }
+  });
+
+  return postsData?.map((post) => {
+    const isRepost = !!post.repost_of;
+    const postData = isRepost ? post.posts : post; // Use original post for reposts
+    const repostProfile = isRepost ? post.profiles : null; // Reposting user's profile
+
+    return {
+      id: postData.id,
+      content: postData.content,
+      created_at: postData.created_at,
+      user_id: postData.user_id,
+      username: postData.profiles?.username || profile.username,
+      display_name: postData.profiles?.display_name || profile.display_name,
+      avatar_url: postData.profiles?.avatar_url || profile.avatar_url,
+      is_verified: postData.profiles?.is_verified || profile.is_verified,
+      likes_count: likesMap.get(postData.id) || 0,
+      is_liked: userLikesSet.has(postData.id),
+      reposts_count: repostsMap.get(postData.id) || 0,
+      is_reposted: userRepostsSet.has(postData.id),
+      reply_to: postData.reply_to,
+      media_urls: postData.media_urls,
+      media_type: postData.media_type,
+      is_repost: isRepost,
+      repost_of: post.repost_of,
+      repost_user_id: isRepost ? post.user_id : null,
+      repost_username: isRepost ? repostProfile?.username : null,
+      repost_display_name: isRepost ? repostProfile?.display_name : null,
+      repost_created_at: isRepost ? post.created_at : null,
+    };
+  }) || [];
+};
 
   const handleFollow = async () => {
     if (!profileData || !currentUserId) return

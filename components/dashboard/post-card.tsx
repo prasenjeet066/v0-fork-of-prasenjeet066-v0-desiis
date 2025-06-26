@@ -102,7 +102,11 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
     try {
       const { error } = await supabase
         .from("posts")
-        .insert({ repost_of: post.id, user_id: currentUser.id }) // <-- Fixed comma
+        .insert({ 
+          repost_of: post.id, 
+          user_id: currentUser.id
+          
+        }) // <-- Fixed comma
       if (!error) {
         onRepost(post.id, true)
       }
@@ -196,7 +200,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   }
 
   // Render repost layout
-  if (post.is_repost && repost && repost.profiles) {
+  if (post.repost_of!==null && repost && repost.profiles) {
     return (
       <>
         <div className="border-b hover:bg-gray-50 transition-colors">
