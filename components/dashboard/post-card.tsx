@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { formatDistanceToNow } from "date-fns"
-import DOMPurify from 'dompurify'
+//import DOMPurify from 'dompurify'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
