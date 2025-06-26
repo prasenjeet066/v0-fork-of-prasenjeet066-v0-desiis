@@ -20,6 +20,7 @@ interface Post {
   likes_count: number
   is_liked: boolean
   reposts_count: number
+  repost_of: string | null
   is_reposted: boolean
   reply_to: string | null
   media_urls: string[] | null
