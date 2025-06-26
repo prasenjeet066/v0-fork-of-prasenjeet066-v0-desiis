@@ -255,7 +255,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         likes_count: likesMap.get(post.id) || 0,
         is_liked: userLikesSet.has(post.id),
         reposts_count: repostsMap.get(post.id) || 0,
-        is_reposted: post.repost_of && post.user_id === currentUserId,
+        is_reposted: post.repost_of && post.user_id == currentUserId,
         reply_to: post.reply_to,
         media_urls: post.media_urls,
         media_type: post.media_type,
@@ -308,9 +308,9 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
     if (!currentUserId) return
 
     if (isReposted) {
-      await supabase.from("reposts").delete().eq("post_id", postId).eq("user_id", currentUserId)
+      await supabase.from("posts").delete().eq("id", postId).eq("user_id", currentUserId)
     } else {
-      await supabase.from("reposts").insert({ post_id: postId, user_id: currentUserId })
+      await supabase.from("posts").insert({ repost_of: postId, user_id: currentUserId })
     }
 
     const updatePosts = (postsList: Post[]) =>
