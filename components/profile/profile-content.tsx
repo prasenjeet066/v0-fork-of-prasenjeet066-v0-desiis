@@ -51,7 +51,8 @@ interface Post {
   reply_to: string | null
   media_urls: string[] | null
   media_type: string | null
-  is_repost: boolean
+  is_repost: boolean,
+  repost_of: string| null
   repost_user_id: string | null
   repost_username: string | null
   repost_display_name: string | null
@@ -139,7 +140,8 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
             user_id,
             media_urls,
     media_type,
-            reply_to
+            reply_to,
+            repost_of
           `)
           .eq("user_id", profile.id)
           .is("reply_to", null)
@@ -156,7 +158,8 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
             user_id,
             media_urls,
     media_type,
-            reply_to
+            reply_to,
+            repost_of
           `)
           .eq("user_id", profile.id)
           .not("reply_to", "is", null)
@@ -238,7 +241,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         userRepostsSet.add(repost.post_id)
       }
     })
-
+    
     return (
       postsData?.map((post) => ({
         id: post.id,
@@ -252,13 +255,14 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         likes_count: likesMap.get(post.id) || 0,
         is_liked: userLikesSet.has(post.id),
         reposts_count: repostsMap.get(post.id) || 0,
-        is_reposted: userRepostsSet.has(post.id),
+        is_reposted: post.repost_of && post.user_id === currentUserId,
         reply_to: post.reply_to,
         media_urls: post.media_urls,
         media_type: post.media_type,
         is_repost: false,
         repost_user_id: null,
-        repost_username: null,
+        repost_of:post.repost_of,
+        repost_username: ,
         repost_display_name: null,
         repost_created_at: null,
       })) || []
