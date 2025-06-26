@@ -125,7 +125,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
             media_urls,
             media_type,
             reply_to,
-            profiles:profiles!inner(username, display_name, avatar_url, is_verified)
+            profiles!inner(username, display_name, avatar_url, is_verified)
           `)
           .eq('id', post.repost_user_id)
           .single()
