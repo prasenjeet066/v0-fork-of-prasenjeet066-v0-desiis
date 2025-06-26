@@ -98,7 +98,22 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   const handlePostClick = () => {
     window.location.href = `/post/${post.id}`
   }
-  
+  if(post.is_repost){
+    const { data: fallbackData, error: fallbackError } = await supabase
+          .from("posts")
+          .select(`
+    id,
+    content,
+    created_at,
+    user_id,
+    media_urls,
+    media_type,
+    reply_to,
+    profiles!inner(username, display_name, avatar_url,is_verified)
+  `)
+          .order("created_at", { ascending: false })
+          .limit(20)
+  }
     
   const renderMedia = (mediaUrls: string[], mediaType: string | null) => {
     if (!mediaUrls || mediaUrls.length === 0) return null
