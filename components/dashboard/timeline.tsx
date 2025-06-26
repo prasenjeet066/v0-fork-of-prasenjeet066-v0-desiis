@@ -61,6 +61,7 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
     media_urls,
     media_type,
     reply_to,
+    repost_of,
     profiles!inner(username, display_name, avatar_url,is_verified)
   `)
           .order("created_at", { ascending: false })
@@ -109,8 +110,9 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
             likes_count: likesMap.get(post.id) || 0,
             is_liked: userLikesSet.has(post.id),
             reposts_count: repostsMap.get(post.id) || 0,
-            is_reposted: userRepostsSet.has(post.id),
+            is_reposted: post.repost_of!==null,
             reply_to: post.reply_to,
+            repost_of:post.repost_of,
             is_verified:post.profiles.is_verified,
             media_urls: post.media_urls,
             media_type: post.media_type,
