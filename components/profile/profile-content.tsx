@@ -375,19 +375,23 @@ const { data: repostsData } = await supabase
   const handleRepost = async (postId: string, isReposted: boolean) => {
     if (!currentUserId) return
 
-    if (isReposted) {
+    /*if (isReposted) {
       await supabase.from("posts").delete().eq("id", postId).eq("user_id", currentUserId)
-    } else {
-      await supabase.from("posts").insert({ repost_of: postId, user_id: currentUserId })
+    } else {*/
+    if(!isReposted){
+      await supabase.from("posts").insert({ 
+        repost_of: postId,
+        user_id: currentUserId
+      })
     }
+  
 
     const updatePosts = (postsList: Post[]) =>
       postsList.map((post) =>
-        post.id === postId
-          ? { ...post, is_reposted: !isReposted, reposts_count: post.reposts_count + (isReposted ? -1 : 1) }
-          : post,
-      )
-
+    post.id === postId ?
+    { ...post, is_reposted: true, reposts_count: post.reposts_count + 1 } :
+    post,
+    );
     setPosts(updatePosts)
     setReplies(updatePosts)
     setReposts(updatePosts)

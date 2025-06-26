@@ -16,32 +16,31 @@ import LinkPreview from '@/components/link-preview'
 interface PostCardProps {
   post: {
     id: string
-    content: string
-    created_at: string
-    user_id: string
-    username: string
-    display_name: string
-    avatar_url: string | null
-    is_verified?: boolean
-    likes_count: number
-    is_liked: boolean
-    reposts_count: number
-    is_reposted: boolean
-    replies_count?: number
-    reply_to: string | null
-    media_urls: string[] | null
-    media_type: string | null
-    is_repost: boolean,
-    repost_of : string | null
-    repost_user_id: string | null
-    repost_username: string | null
-    repost_display_name: string | null
-    repost_created_at: string | null
+content: string
+created_at: string
+user_id: string
+username: string
+display_name: string
+avatar_url: string | null
+likes_count: number
+is_liked: boolean
+posts_count: number
+is_posted: boolean
+reply_to: string | null
+media_urls: string[] | null
+media_type: string | null
+is_post: boolean,
+  post_of: string | null
+post_user_id: string | null
+post_username: string | null
+post_display_name: string | null
+post_created_at: string | null
+is_verified: boolean
   }
   currentUserId: string
   currentUser: any
   onLike: (postId: string, isLiked: boolean) => void
-  onRepost: (postId: string, isReposted: boolean) => void
+  onpost: (postId: string, isposted: boolean) => void
   onReply?: () => void
 }
 
@@ -51,14 +50,14 @@ function extractFirstUrl(text: string) {
   return match ? match[0] : null
 }
 
-type RepostProfile = {
+type postProfile = {
   username: string
   display_name: string
   avatar_url: string | null
   is_verified?: boolean
 }
 
-type RepostData = {
+type postData = {
   id: string
   content: string
   created_at: string
@@ -66,13 +65,13 @@ type RepostData = {
   media_urls: string[] | null
   media_type: string | null
   reply_to: string | null
-  profiles: RepostProfile
+  profiles: postProfile
 }
 
-export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, onReply }: PostCardProps) {
+export function PostCard({ post, currentUserId, currentUser, onLike, onpost, onReply }: PostCardProps) {
   const [showReplyDialog, setShowReplyDialog] = useState(false)
-  const [repostLoading, setRepostLoading] = useState(false)
-  const [repost, setRepost] = useState<RepostData | null>(null)
+  const [postLoading, setpostLoading] = useState(false)
+  const [post, setpost] = useState<postData | null>(null)
   const postUrl = extractFirstUrl(post.content)
   const hasMedia = post.media_urls && post.media_urls.length > 0
 
@@ -96,52 +95,28 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   // Reply handler
   const handleReplyClick = () => setShowReplyDialog(true)
 
-  // Repost handler
-  const handleRepost = async () => {
-    setRepostLoading(true)
+  // post handler
+  const handlepost = async () => {
+    setpostLoading(true)
     try {
       const { error } = await supabase
         .from("posts")
         .insert({ 
-          repost_of: post.id, 
+          post_of: post.id, 
           user_id: currentUser.id
           
         }) // <-- Fixed comma
       if (!error) {
-        onRepost(post.id, true)
+        onpost(post.id, true)
       }
     } catch (error) {
-      console.error("Error reposting:", error)
+      console.error("Error posting:", error)
     } finally {
-      setRepostLoading(false)
+      setpostLoading(false)
     }
   }
-  // Fetch repost data if this is a repost
-  useEffect(() => {
-    const fetchRepost = async () => {
-      if (post.is_repost && post.repost_user_id) {
-        const { data, error } = await supabase
-          .from('posts')
-          .select(`
-            id,
-            content,
-            created_at,
-            user_id,
-            media_urls,
-            media_type,
-            reply_to,
-            profiles!inner(username, display_name, avatar_url, is_verified)
-          `)
-          .eq('id', post.repost_of)
-          .single()
-        if (!error && data) {
-          setRepost(data)
-        }
-      }
-    }
-    fetchRepost()
-  }, [post])
-
+  // Fetch post data if this is a post
+  
   // Render image/video/gif media
   const renderMedia = (mediaUrls: string[] | null, mediaType: string | null) => {
     if (!mediaUrls || mediaUrls.length === 0) return null
@@ -199,26 +174,26 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
     window.location.href = `/post/${post.id}`
   }
 
-  // Render repost layout
-  if (post.repost_of!==null && repost && repost.profiles) {
+  // Render post layout
+  if (post.post_of!==null && post.is_post) {
     return (
       <>
         <div className="border-b hover:bg-gray-50 transition-colors">
-          {/* Repost Header */}
+          {/* post Header */}
           <div className="px-4 pt-3 pb-2">
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Repeat2 className="h-4 w-4 text-green-600" />
               <Link
-                href={`/profile/${repost.profiles.username}`}
+                href={`/profile/${post.username}`}
                 className="hover:underline font-medium"
                 onClick={e => e.stopPropagation()}
               >
-                {repost.profiles.display_name}
+                {post.post_display_name}
               </Link>
-              <span>reposted</span>
+              <span>posted</span>
               <span className="text-gray-400">·</span>
               <span className="text-gray-500 text-xs">
-                {formatDistanceToNow(new Date(repost.created_at), { addSuffix: true })}
+                {formatDistanceToNow(new Date(post.post_created_at), { addSuffix: true })}
               </span>
             </div>
           </div>
@@ -226,37 +201,37 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
           <div className="px-4 pb-4 cursor-pointer" onClick={handlePostClick}>
             <div className="border rounded-xl p-4 bg-white hover:bg-gray-50 transition-colors">
               <div className="flex gap-3">
-                <Link href={`/profile/${repost.profiles.username}`} className="flex-shrink-0" onClick={e => e.stopPropagation()}>
+                <Link href={`/profile/${post.post_username}`} className="flex-shrink-0" onClick={e => e.stopPropagation()}>
                   <Avatar className="cursor-pointer h-10 w-10">
-                    <AvatarImage src={repost.profiles.avatar_url || undefined} />
-                    <AvatarFallback>{repost.profiles.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
+                    <AvatarImage src={post.profiles.avatar_url || undefined} />
+                    <AvatarFallback>{post.avatar_url?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
                   </Avatar>
                 </Link>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col items-left gap-1">
                     <Link
-                      href={`/profile/${repost.profiles.username}`}
+                      href={`/profile/${post.username}`}
                       className="hover:underline"
                       onClick={e => e.stopPropagation()}
                     >
                       <span className="font-semibold flex items-center gap-1">
-                        {repost.profiles.display_name}
-                        {repost.profiles.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
+                        {post.display_name}
+                        {r.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
                       </span>
                     </Link>
                     <div className="flex flex-row items-center gap-1">
-                      <span className="text-gray-500 text-[10px]">@{repost.profiles.username}</span>
+                      <span className="text-gray-500 text-[10px]">@{post.username}</span>
                       <span className="text-gray-500 text-[10px]">·</span>
                       <span className="text-gray-500 text-[10px]">
-                        {formatDistanceToNow(new Date(repost.created_at), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                       </span>
                     </div>
                   </div>
                   <div
                     className="text-gray-900 mb-3 whitespace-pre-wrap leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: formatContent(repost.content) }}
+                    dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
                   />
-                  {renderMedia(repost.media_urls, repost.media_type)}
+                  {renderMedia(post.media_urls, post.media_type)}
                   <div className="flex items-center justify-between max-w-md mt-3">
                     <Button
                       variant="ghost"
@@ -275,16 +250,16 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                       size="sm"
                       onClick={async e => {
                         e.stopPropagation()
-                        await handleRepost()
+                        await handlepost()
                       }}
-                      disabled={repostLoading}
+                      disabled={postLoading}
                     >
-                      {repostLoading ? (
+                      {postLoading ? (
                         <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                       ) : (
                         <Repeat2 className="h-4 w-4 mr-1" />
                       )}
-                      <span className="text-xs lg:text-sm">{post.reposts_count}</span>
+                      <span className="text-xs lg:text-sm">{post.posts_count}</span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -393,16 +368,16 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
                   size="sm"
                   onClick={async e => {
                     e.stopPropagation()
-                    await handleRepost()
+                    await handlepost()
                   }}
-                  disabled={repostLoading}
+                  disabled={postLoading}
                 >
-                  {repostLoading ? (
+                  {postLoading ? (
                     <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                   ) : (
                     <Repeat2 className="h-4 w-4 mr-1" />
                   )}
-                  <span className="text-xs lg:text-sm">{post.reposts_count}</span>
+                  <span className="text-xs lg:text-sm">{post.posts_count}</span>
                 </Button>
                 <Button
                   variant="ghost"
