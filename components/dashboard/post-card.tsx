@@ -72,8 +72,8 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   setRepostLoading(true);
   try {
     const { error } = await supabase
-      .from("reposts")
-      .insert({ post_id: post.id, user_id: currentUser.id });
+      .from("posts")
+      .insert({ repost_of:post.id user_id: currentUser.id });
 
     if (!error) {
       setRepostLoading(false);
@@ -98,10 +98,12 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   const handlePostClick = () => {
     window.location.href = `/post/${post.id}`
   }
-
+  
+    
   const renderMedia = (mediaUrls: string[], mediaType: string | null) => {
     if (!mediaUrls || mediaUrls.length === 0) return null
-
+  
+  }
     return (
       <div className="mt-3 rounded-lg overflow-hidden border">
         {mediaType === "video" ? (
@@ -146,6 +148,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   }
 
   if (post.is_repost) {
+    
     // Repost layout - show repost header and original post
     return (
       <>
