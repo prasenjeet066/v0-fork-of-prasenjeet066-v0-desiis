@@ -31,7 +31,8 @@ interface PostCardProps {
     reply_to: string | null
     media_urls: string[] | null
     media_type: string | null
-    is_repost: boolean
+    is_repost: boolean,
+    repost_of : string | null
     repost_user_id: string | null
     repost_username: string | null
     repost_display_name: string | null
@@ -127,7 +128,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
             reply_to,
             profiles!inner(username, display_name, avatar_url, is_verified)
           `)
-          .eq('id', post.repost_user_id)
+          .eq('id', post.repost_of)
           .single()
         if (!error && data) {
           setRepost(data)
