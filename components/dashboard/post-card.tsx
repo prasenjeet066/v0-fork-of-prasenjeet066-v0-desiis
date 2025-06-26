@@ -74,7 +74,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   try {
     const { error } = await supabase
       .from("posts")
-      .insert({ repost_of:post.id user_id: currentUser.id });
+      .insert({ repost_of:post.id ,user_id: currentUser.id });
 
     if (!error) {
       setRepostLoading(false);
@@ -114,9 +114,12 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
     reply_to,
     profiles!inner(username, display_name, avatar_url,is_verified)
   `).eq("id", post.repost_of)
-  
+      if(data){
+        setRepost(data)
+      }
       }
     }
+    
     getRepostf()
   },[post])
   
