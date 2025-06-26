@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { formatDistanceToNow } from "date-fns"
+import DOMPurify from 'dompurify'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -78,7 +79,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   const formatContent = (content: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     
-    return content
+    content = content
       .replace(
       urlRegex,
       '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline break-all">$1</a>'
@@ -88,6 +89,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
         '<span class="text-blue-600 hover:underline cursor-pointer">#$1</span>',
       )
       .replace(/@([a-zA-Z0-9_]+)/g, '<span class="text-blue-600 hover:underline cursor-pointer">@$1</span>')
+      return DOMPurify.sanitize(formatted);
   }
 
   // Reply handler
