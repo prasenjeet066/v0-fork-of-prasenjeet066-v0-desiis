@@ -54,6 +54,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   const [showRepostDialog, setShowRepostDialog] = useState(false)
   const postUrl = extractFirstUrl(post.content)
   const [repostLoading, setRepostLoading] = useState(false)
+  const [repost, setRepost] = useState<any>(null)
   const hasMedia = post.media_urls && post.media_urls.length > 0
   const formatContent = (content: string) => {
     return content
@@ -98,22 +99,34 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   const handlePostClick = () => {
     window.location.href = `/post/${post.id}`
   }
-  if(post.is_repost){
-    const { data: fallbackData, error: fallbackError } = await supabase
-          .from("posts")
-          .select(`
-    id,
-    content,
-    created_at,
-    user_id,
-    media_urls,
-    media_type,
-    reply_to,
-    profiles!inner(username, display_name, avatar_url,is_verified)
-  `)
-          .order("created_at", { ascending: false })
-          .limit(20)
-  }
+  
+
+  useEffect(() => {
+  const fetchRepost = async () => {
+    if (post.is_repost && post.repost_user_id) {
+      
+      const { data, error } = await supabase
+        .from('posts')
+        .select(`
+          id,
+          content,
+          created_at,
+          user_id,
+          media_urls,
+          media_type,
+          reply_to,
+          profiles!inner(username, display_name, avatar_url, is_verified)
+        `)
+        .eq('id', post.repost_user_id) // Or post.repost_of, depending on your schema
+        .single();
+      if (!error && data) {
+        setRepost(data);
+      }
+    
+    }
+  };
+  fetchRepost();
+}, [post]);
     
   const renderMedia = (mediaUrls: string[], mediaType: string | null) => {
     if (!mediaUrls || mediaUrls.length === 0) return null
@@ -173,16 +186,16 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Repeat2 className="h-4 w-4 text-green-600" />
               <Link
-                href={`/profile/${post.repost_username}`}
+                href={`/profile/${repost.profile.username}`}
                 className="hover:underline font-medium"
                 onClick={(e) => e.stopPropagation()}
               >
-                {post.repost_display_name}
+                {repost.profile.display_name}
               </Link>
               <span>reposted</span>
               <span className="text-gray-400">·</span>
               <span className="text-gray-500 text-xs">
-                {formatDistanceToNow(new Date(post.repost_created_at!), { addSuffix: true })}
+                {formatDistanceToNow(new Date(repost.created_at!), { addSuffix: true })}
               </span>
             </div>
           </div>
@@ -193,38 +206,38 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
               <div className="flex gap-3">
                 <Link href={`/profile/${post.username}`} className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                   <Avatar className="cursor-pointer h-10 w-10">
-                    <AvatarImage src={post.avatar_url || undefined} />
-                    <AvatarFallback>{post.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
+                    <AvatarImage src={repost.profile.avatar_url || undefined} />
+                    <AvatarFallback>{repost.profile.display_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
                   </Avatar>
                 </Link>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col items-left gap-1">
                     <Link
-                      href={`/profile/${post.username}`}
+                      href={`/profile/${repost.profile.username}`}
                       className="hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <span className="font-semibold flex items-center gap-1">
-                        {post.display_name}
+                        {repost.profile.display_name}
                         {post.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
                       </span>
                     </Link>
                     <div className="flex flex-row items-center gap-1" >
-                    <span className="text-gray-500 text-[10px]">@{post.username}</span>
+                    <span className="text-gray-500 text-[10px]">@{repost.profile.username}</span>
                     <span className="text-gray-500 text-[10px]">·</span>
                     <span className="text-gray-500 text-[10px]">
-                      {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(repost.created_at), { addSuffix: true })}
                     </span>
                     </div>
                   </div>
 
                   <div
                     className="text-gray-900 mb-3 whitespace-pre-wrap leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
+                    dangerouslySetInnerHTML={{ __html: formatContent(repost.content) }}
                   />
 
-                  {renderMedia(post.media_urls, post.media_type)}
+                  {renderMedia(repost.media_urls, repost.media_type)}
 
                   <div className="flex items-center justify-between max-w-md mt-3">
                     <Button
@@ -245,9 +258,9 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   size="sm"
   onClick={ async (e) => {
     e.stopPropagation();
-    await handleRepost(); // <-- Use your function here
+   // await handleRepost(); // <-- Use your function here
   }}
-  disabled={repostLoading}
+
 >
   {repostLoading ? (
     <Loader2 className="h-4 w-4 mr-1 animate-spin" />
