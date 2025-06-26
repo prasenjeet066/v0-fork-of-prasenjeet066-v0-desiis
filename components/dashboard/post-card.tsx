@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect} from "react"
 import { formatDistanceToNow } from "date-fns"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { supabase } from "@/lib/supabase/client"
@@ -54,6 +54,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   const [showRepostDialog, setShowRepostDialog] = useState(false)
   const postUrl = extractFirstUrl(post.content)
   const [repostLoading, setRepostLoading] = useState(false)
+  const [repost,setRepost]=useState(null)
   const hasMedia = post.media_urls && post.media_urls.length > 0
   const formatContent = (content: string) => {
     return content
@@ -98,8 +99,9 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
   const handlePostClick = () => {
     window.location.href = `/post/${post.id}`
   }
- let repost;
-  if(post.is_repost){
+  useEffect(()=>{
+    async function getRepostf(){
+      if(post.is_repost){
     const { data: fallbackData, error: fallbackError } = await supabase
           .from("posts")
           .select(`
@@ -113,7 +115,11 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onRepost, o
     profiles!inner(username, display_name, avatar_url,is_verified)
   `).eq("id", post.repost_of)
   
-  }
+      }
+    }
+    getRepostf()
+  },[post])
+  
     
   const renderMedia = (mediaUrls: string[], mediaType: string | null) => {
     if (!mediaUrls || mediaUrls.length === 0) return null
