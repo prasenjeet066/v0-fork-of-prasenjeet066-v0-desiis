@@ -262,7 +262,7 @@ export function ProfileContent({ username, currentUserId }: ProfileContentProps)
         is_repost: false,
         repost_user_id: null,
         repost_of:post.repost_of,
-        repost_username: ,
+        repost_username: null,
         repost_display_name: null,
         repost_created_at: null,
       })) || []
