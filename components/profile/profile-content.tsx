@@ -38,26 +38,27 @@ interface ProfileData {
 
 interface Post {
   id: string
-  content: string
-  created_at: string
-  user_id: string
-  username: string
-  display_name: string
-  avatar_url: string | null
-  likes_count: number
-  is_liked: boolean
-  reposts_count: number
-  is_reposted: boolean
-  reply_to: string | null
-  media_urls: string[] | null
-  media_type: string | null
-  is_repost: boolean,
-  repost_of: string| null
-  repost_user_id: string | null
-  repost_username: string | null
-  repost_display_name: string | null
-  repost_created_at: string | null
-  is_verified: boolean
+content: string
+created_at: string
+user_id: string
+username: string
+display_name: string
+avatar_url: string | null
+likes_count: number
+is_liked: boolean
+posts_count: number
+is_reposted: boolean
+reply_to: string | null
+media_urls: string[] | null
+media_type: string | null
+is_repost: boolean
+repost_of: string | null
+reposted_by : string | null
+post_user_id: string | null
+post_username: string | null
+post_display_name: string | null
+post_created_at: string | null
+is_verified: boolean
 }
 
 export function ProfileContent({ username, currentUserId }: ProfileContentProps) {
@@ -280,6 +281,7 @@ const { data: repostsData } = await supabase
       })) || []
     )
   }**/
+  
   const formatPosts = async (postsData: any[], profile: any) => {
   const postIds = postsData?.map((p) => p.id) || [];
   const [likesData, repostsData] = await Promise.all([
@@ -329,6 +331,7 @@ const { data: repostsData } = await supabase
       media_type: postData.media_type,
       is_repost: isRepost,
       repost_of: post.repost_of,
+      reposted_by: isRepost,
       repost_user_id: isRepost ? post.user_id : null,
       repost_username: isRepost ? repostProfile?.username : null,
       repost_display_name: isRepost ? repostProfile?.display_name : null,

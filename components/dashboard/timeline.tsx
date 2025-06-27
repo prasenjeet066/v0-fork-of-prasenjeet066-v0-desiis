@@ -11,26 +11,27 @@ interface TimelineProps {
 
 interface Post {
   id: string
-  content: string
-  created_at: string
-  user_id: string
-  username: string
-  display_name: string
-  avatar_url: string | null
-  likes_count: number
-  is_liked: boolean
-  reposts_count: number
-  repost_of: string | null
-  is_reposted: boolean
-  reply_to: string | null
-  media_urls: string[] | null
-  media_type: string | null
-  is_repost: boolean
-  is_verified: boolean 
-  repost_user_id: string | null
-  repost_username: string | null
-  repost_display_name: string | null
-  repost_created_at: string | null
+content: string
+created_at: string
+user_id: string
+username: string
+display_name: string
+avatar_url: string | null
+likes_count: number
+is_liked: boolean
+posts_count: number
+is_reposted: boolean
+reply_to: string | null
+media_urls: string[] | null
+media_type: string | null
+is_repost: boolean
+repost_of: string | null
+reposted_by: string | null
+post_user_id: string | null
+post_username: string | null
+post_display_name: string | null
+post_created_at: string | null
+is_verified: boolean
 }
 
 export function Timeline({ userId, refreshTrigger }: TimelineProps) {
@@ -63,6 +64,7 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
     media_type,
     reply_to,
     repost_of,
+    
     profiles!inner(username, display_name, avatar_url,is_verified)
   `)
           .order("created_at", { ascending: false })
@@ -76,8 +78,8 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
         // Get likes and reposts for fallback posts
         const postIds = fallbackData?.map((p) => p.id) || []
         const [likesData, repostsData] = await Promise.all([
-          supabase.from("likes").select("post_id, user_id").in("post_id", postIds),
-          supabase.from("reposts").select("post_id, user_id").in("post_id", postIds),
+          supabase.from("likes").select("post_id, user_id").in("post_id", postIds)
+         // supabase.from("reposts").select("post_id, user_id").in("post_id", postIds),
         ])
 
         const likesMap = new Map()
@@ -118,10 +120,7 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
             media_urls: post.media_urls,
             media_type: post.media_type,
             is_repost: false || null,
-            repost_user_id: null,
-            repost_username: null,
-            repost_display_name: null,
-            repost_created_at: null,
+            repost_by : post.user_id
           })) || []
 
         setPosts(formattedPosts)
@@ -156,16 +155,21 @@ export function Timeline({ userId, refreshTrigger }: TimelineProps) {
 
   const handleRepost = async (postId: string, isReposted: boolean) => {
     if (isReposted) {
-      await supabase.from("reposts").delete().eq("post_id", postId).eq("user_id", userId)
+      //await supabase.from("reposts").delete().eq("post_id", postId).eq("user_id", userId)
     } else {
-      await supabase.from("reposts").insert({ post_id: postId, user_id: userId })
+      await supabase.from("posts").insert({ repost_of: postId, user_id: userId })
     }
 
     // Update local state
     setPosts(
       posts.map((post) =>
         post.id === postId
-          ? { ...post, is_reposted: !isReposted, reposts_count: post.reposts_count + (isReposted ? -1 : 1) }
+          ? { 
+            ...post, 
+            is_reposted: !isReposted,
+            reposts_count:  post.reposts_count + 1 
+            
+          }
           : post,
       ),
     )

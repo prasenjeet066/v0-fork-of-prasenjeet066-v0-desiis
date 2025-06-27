@@ -25,12 +25,13 @@ avatar_url: string | null
 likes_count: number
 is_liked: boolean
 posts_count: number
-is_posted: boolean
+is_reposted: boolean
 reply_to: string | null
 media_urls: string[] | null
 media_type: string | null
-is_post: boolean,
-  post_of: string | null
+is_repost: boolean
+repost_of: string | null
+reposted_by : string | null
 post_user_id: string | null
 post_username: string | null
 post_display_name: string | null
@@ -93,8 +94,8 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onpost, onR
   }
 
   // Reply handler
-  const handleReplyClick = () => setShowReplyDialog(true)
-
+  const handleReplyClick = () => { setShowReplyDialog(true)
+  }
   // post handler
   /*const handlepost = async () => {
     setpostLoading(true)
@@ -175,144 +176,18 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onpost, onR
   }
 
   // Render post layout
-  if (post.post_of!==null && post.is_post) {
-    return (
-      <>
-        <div className="border-b hover:bg-gray-50 transition-colors">
-          {/* post Header */}
-          <div className="px-4 pt-3 pb-2">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Repeat2 className="h-4 w-4 text-green-600" />
-              <Link
-                href={`/profile/${post.username}`}
-                className="hover:underline font-medium"
-                onClick={e => e.stopPropagation()}
-              >
-                {post.post_display_name}
-              </Link>
-              <span>posted</span>
-              <span className="text-gray-400">·</span>
-              <span className="text-gray-500 text-xs">
-                {formatDistanceToNow(new Date(post.post_created_at), { addSuffix: true })}
-              </span>
-            </div>
-          </div>
-          {/* Original Post */}
-          <div className="px-4 pb-4 cursor-pointer" onClick={handlePostClick}>
-            <div className="border rounded-xl p-4 bg-white hover:bg-gray-50 transition-colors">
-              <div className="flex gap-3">
-                <Link href={`/profile/${post.post_username}`} className="flex-shrink-0" onClick={e => e.stopPropagation()}>
-                  <Avatar className="cursor-pointer h-10 w-10">
-                    <AvatarImage src={post.profiles.avatar_url || undefined} />
-                    <AvatarFallback>{post.avatar_url?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
-                  </Avatar>
-                </Link>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col items-left gap-1">
-                    <Link
-                      href={`/profile/${post.username}`}
-                      className="hover:underline"
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <span className="font-semibold flex items-center gap-1">
-                        {post.display_name}
-                        {r.is_verified && <VerificationBadge className="h-4 w-4" size={15}/>}
-                      </span>
-                    </Link>
-                    <div className="flex flex-row items-center gap-1">
-                      <span className="text-gray-500 text-[10px]">@{post.username}</span>
-                      <span className="text-gray-500 text-[10px]">·</span>
-                      <span className="text-gray-500 text-[10px]">
-                        {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    className="text-gray-900 mb-3 whitespace-pre-wrap leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
-                  />
-                  {renderMedia(post.media_urls, post.media_type)}
-                  <div className="flex items-center justify-between max-w-md mt-3">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                      onClick={e => {
-                        e.stopPropagation()
-                        handleReplyClick()
-                      }}
-                    >
-                      <MessageCircle className="h-4 w-4 mr-1" />
-                      <span className="text-sm">{post.replies_count || 0}</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={async e => {
-                        e.stopPropagation()
-                        await handlepost()
-                      }}
-                      disabled={postLoading}
-                    >
-                      {postLoading ? (
-                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      ) : (
-                        <Repeat2 className="h-4 w-4 mr-1" />
-                      )}
-                      <span className="text-xs lg:text-sm">{post.posts_count}</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={`${post.is_liked ? "text-red-600 bg-red-50" : "text-gray-500 hover:text-red-600 hover:bg-red-50"} p-2 rounded-full`}
-                      onClick={e => {
-                        e.stopPropagation()
-                        onLike(post.id, post.is_liked)
-                      }}
-                    >
-                      <Heart className={`h-4 w-4 mr-1 ${post.is_liked ? "fill-current" : ""}`} />
-                      <span className="text-sm">{post.likes_count}</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <Share className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-full"
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Reply Dialog */}
-        <ReplyDialog
-          isOpen={showReplyDialog}
-          onClose={() => setShowReplyDialog(false)}
-          post={post}
-          currentUser={currentUser}
-          onReply={() => {
-            setShowReplyDialog(false)
-            onReply?.()
-          }}
-        />
-      </>
-    )
-  }
-
+  
+  
   // Regular post layout
   return (
     <>
+      {
+      post.is_repost &&
+      <>
+        <div className="flex flex-row gap-1"><Repeat2/> {"Reposted by"} <a href ={"/profile/"+post.username}>@{post.reposted_by}</a></div>
+      </>
+        
+      }
       <div className="border-b hover:bg-gray-50 transition-colors cursor-pointer" onClick={handlePostClick}>
         <div className="p-4">
           <div className="flex gap-3">
@@ -426,4 +301,4 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onpost, onR
       />
     </>
   )
-    }
+}
