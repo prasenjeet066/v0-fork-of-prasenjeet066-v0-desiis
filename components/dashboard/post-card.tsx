@@ -96,7 +96,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onpost, onR
   const handleReplyClick = () => setShowReplyDialog(true)
 
   // post handler
-  const handlepost = async () => {
+  /*const handlepost = async () => {
     setpostLoading(true)
     try {
       const { error } = await supabase
@@ -114,7 +114,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onpost, onR
     } finally {
       setpostLoading(false)
     }
-  }
+  }*/
   // Fetch post data if this is a post
   
   // Render image/video/gif media
